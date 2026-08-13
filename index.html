@@ -184,6 +184,7 @@ input[type=range]{width:100%;accent-color:var(--accent);background:transparent;
   border-top:1px solid var(--line);padding-top:11px;font-size:13.5px}
 .cost{color:var(--ink-2)}
 .cost b{color:var(--ink);font-weight:400}
+.links{display:flex;gap:14px;align-items:center;white-space:nowrap}
 a.map{color:var(--accent);text-decoration:none;font-size:12px;letter-spacing:.09em;
   text-transform:uppercase;font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;
   border-bottom:1px solid var(--accent);padding-bottom:1px;white-space:nowrap}
@@ -596,7 +597,7 @@ const I18N={
   kRate:"Hodnotenie",kVis:"Vidieť",kSup:"Na vodu",kSleep:"Spanie",kToll:"Mýto",
   top:"Top 5",check:"Over pravidlá",heads:"Pozor",noToll:"Nič navyše — známky už máš",
   picked:"Vybraté z grafu",
-  roundtrip:"Tam a späť",breakdown:(f,t)=>`· palivo ${f} + mýto ${t}`,map:"Mapa",
+  roundtrip:"Tam a späť",breakdown:(f,t)=>`· palivo ${f} + mýto ${t}`,map:"Mapa",rev:"Recenzie",revq:"recenzie",
   empty:"Nič nesedí — uvoľni filtre.",
   count:(n,c)=>`<b>${n}</b> ${n===1?"lokalita":n<5?"lokality":"lokalít"} · najlacnejší výjazd <b class="mono">${c} €</b> vrátane mýta`,
   tollTitle:"Z čoho sa mýto počíta",
@@ -637,7 +638,7 @@ const I18N={
   kRate:"Rating",kVis:"See",kSup:"Put-in",kSleep:"Sleep",kToll:"Tolls",
   top:"Top 5",check:"Check rules",heads:"Heads-up",noToll:"Nothing extra — you have the vignettes",
   picked:"Picked from the chart",
-  roundtrip:"Round trip",breakdown:(f,t)=>`· fuel ${f} + tolls ${t}`,map:"Map",
+  roundtrip:"Round trip",breakdown:(f,t)=>`· fuel ${f} + tolls ${t}`,map:"Map",rev:"Reviews",revq:"reviews",
   empty:"Nothing matches — loosen the filters.",
   count:(n,c)=>`<b>${n}</b> ${n===1?"spot":"spots"} · cheapest trip <b class="mono">€${c}</b> including tolls`,
   tollTitle:"What the tolls are made of",
@@ -816,9 +817,11 @@ function cards(){
           L==="sk"?Math.round(trip(x))+" €":"€"+Math.round(trip(x))}</b>
           <span style="color:var(--ink-3)">${
             c.breakdown(Math.round(fuel(h)),Math.round(tollSum(n,co)))}</span></span>
-        <a class="map" target="_blank" rel="noopener"
+        <span class="links"><a class="map" target="_blank" rel="noopener"
           href="https://www.google.com/maps/search/?api=1&query=${
-            encodeURIComponent(n+" "+co)}">${c.map}</a>
+            encodeURIComponent(n+" "+co)}">${c.map}</a><a class="map" target="_blank"
+          rel="noopener" href="https://www.google.com/search?q=${
+            encodeURIComponent(n+" "+co+" "+c.revq)}">${c.rev}</a></span>
       </div></article>`}).join("");
 }
 

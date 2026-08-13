@@ -36,6 +36,26 @@
   --w-lake:#4FA8D8; --w-sea:#3ECAB4; --w-river:#E0A455;
   --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px -14px rgba(0,0,0,.7);
 }
+
+/* Režim na slnko — maximálny kontrast, väčšie písmo, výrazné okraje.
+   Umiestnené za ostatnými :root blokmi, aby prebilo svetlý aj tmavý motív. */
+:root.hc{
+  --ground:#FFFFFF; --panel:#FFFFFF; --panel-2:#E9E9E9; --line:#767676;
+  --ink:#000000; --ink-2:#171717; --ink-3:#3A3A3A;
+  --accent:#0A46A0; --accent-soft:#D4E3FA;
+  --good:#12652C; --warn:#7E4A00; --crit:#9E1010;
+  --murk:#7A5600; --clear:#0A5FA0;
+  --w-lake:#0A5FA0; --w-sea:#046654; --w-river:#8A4600;
+  --shadow:0 0 0 1px rgba(0,0,0,.22);
+}
+:root.hc body{font-size:17px;line-height:1.5}
+:root.hc .card,:root.hc .chartbox,:root.hc .panelbox{border-width:2px}
+:root.hc .row .k,:root.hc label.f > span,:root.hc .eyebrow{color:var(--ink-2)}
+:root.hc .cost span,:root.hc .count{color:var(--ink-2)}
+:root.hc .pill{border:1px solid var(--line)}
+:root.hc .grid{stroke:var(--ink-3);stroke-opacity:.5}
+:root.hc .dot{stroke:#000;stroke-width:1.5}
+:root.hc select,:root.hc input{border-width:2px}
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);
   font-family:Charter,"Bitstream Charter","Iowan Old Style","Palatino Linotype",Georgia,serif;
@@ -258,6 +278,7 @@ footer b{color:var(--ink-2);font-weight:400}
     <div class="hbtns">
       <button class="tbtn" id="lang">EN</button>
       <button class="tbtn" id="theme"></button>
+      <button class="tbtn" id="hc"></button>
     </div>
   </div>
 </header>
@@ -306,8 +327,8 @@ footer b{color:var(--ink-2);font-weight:400}
     <label class="f"><span id="lLkm"></span>
       <input type="number" id="lkm" value="5.5" step="0.1" min="1"></label>
     <label class="f"><span id="lEur"></span>
-      <input type="number" id="eur" value="1.55" step="0.01" min="0.1"></label>
-    <label class="chk"><input type="checkbox" id="fF"> <span id="lF"></span></label>
+      <input type="number" id="eur" value="1.80" step="0.01" min="0.1"></label>
+    <label class="f"><span id="lF"></span><select id="fF"></select></label>
   </section>
 
   <section class="ctyrow">
@@ -582,14 +603,14 @@ const BANS=[
 ];
 
 const I18N={
- sk:{lang:"EN",dark:"Tmavý režim",light:"Svetlý režim",
+ sk:{lang:"EN",dark:"Tmavý režim",light:"Svetlý režim",sun:"Na slnko",sunOff:"Späť",
   h1:'Kam s paddleboardom <em>a na freedive</em>',
   sub:"56 vôd do 9 hodín jazdy z Bratislavy, zoradených podľa toho, čo je pod hladinou vidieť. Ultra-low-budget: stan, vlastná strava, Yaris.",
   chartTitle:"Hĺbkomer: čas jazdy vs. viditeľnosť",chartHint:"Klikni na bod → skočí na kartu",
   mapTitle:"Mapa: kde to celé leží",mapHint:"Krúžky = dojazd z Bratislavy",
   segChart:"Hĺbkomer",segMap:"Mapa",gmap:"↗ Moja Google mapa",
   legend:["jazero","more","rieka","Čím nižšie bod, tým čistejšia voda.","Krúžky = 2,5 / 5 / 9 hodín jazdy z Bratislavy."],
-  lC:"Krajiny",lW:"Typ vody",lD:"Trvanie",lS:"Zoradiť",lF:"Len vhodné na freedive (od ~5 m)",
+  lC:"Krajiny",lW:"Typ vody",lD:"Trvanie",lS:"Zoradiť",lF:"Pod hladinou",
   lLkm:"Spotreba l/100 km",lEur:"Cena paliva €/l",lQ:"Hľadať",lV:"Diaľničné známky, ktoré už mám",
   lMaxH:"Najviac hodín jazdy",lMinV:"Najmenej viditeľnosti",lMaxC:"Najviac za výjazd",
   reset:"Zrušiť filtre",
@@ -598,12 +619,12 @@ const I18N={
   fCst:c=>c>=300?"bez limitu":`do ${c} €`,
   cname:{AT:"Rakúsko",SK:"Slovensko",SI:"Slovinsko",IT:"Taliansko",
     HR:"Chorvátsko",DE:"Nemecko",PL:"Poľsko",HU:"Maďarsko",CH:"Švajčiarsko"},
-  tipF:"Nechá len vody, kde má freedive zmysel — zhruba od 5 m viditeľnosti. Vypadne 14 lokalít: kalné rieky, Neusiedler See a plytké štrkoviská.",
   qph:"Krk, Soča, kemp…",all:"Všetky",
   water:{jazero:"Jazero",more:"More",rieka:"Rieka"},
   dur:{1:"Jednodňovka — do 2,5 h",2:"Víkend — 3 až 5 h",3:"Predĺžený — 6 až 9 h"},
   durShort:{1:"Jednodňovka",2:"Víkend",3:"Predĺžený"},
   wShort:{jazero:"jazero",more:"more",rieka:"rieka"},
+  uw:{all:"Nezáleží",snork:"Aspoň snorkeling (~2 m+)",free:"Na freedive (~5 m+)"},
   sort:{rating:"Podľa hodnotenia",vis:"Podľa viditeľnosti",time:"Podľa času jazdy",cost:"Podľa ceny výjazdu"},
   sleep:{K2:"Kemp pri vode",K1:"Kemp v okolí",A:"Auto na parkovisku",X:"Nič v okolí"},
   kRate:"Hodnotenie",kVis:"Vidieť",kSup:"Na vodu",kSleep:"Spanie",kToll:"Mýto",
@@ -619,18 +640,18 @@ const I18N={
   banLead:"Osem miest, kde je vstup na vodu alebo do vody zakázaný. Stoja tu preto, že sú to presne tie lokality, ktoré vyskočia pri hľadaní „najkrajšie jazero“ — a človek tam odjazdí osem hodín zbytočne.",
   thB:["Lokalita","Čo tam platí"],
   foot:`<p><b>Spanie.</b> <em>Kemp pri vode</em> = oficiálny kemp priamo na brehu. <em>Kemp v okolí</em> = do zhruba 10 km, treba prejsť. <em>Auto na parkovisku</em> = kemp je ďaleko alebo žiadny, prespanie v aute býva tolerované mimo hlavnej sezóny. <em>Nič v okolí</em> = plánuj to ako jednodňovku. <b>Divoké stanovanie je v AT, IT, SI aj HR zakázané a pokutované</b>, v chránených územiach obzvlášť.</p>
-<p><b>Hodnotenie</b> je vypočítané, nie vycucané z prsta: viditeľnosť pod vodou (55 bodov), vhodnosť na freedive (25), bonus za TOP 5 (12) a zrážka za obmedzenia — 16 bodov, ak treba overiť pravidlá, 5 pri menšom háčiku. <b>Meria kvalitu vody, nie kvalitu výletu.</b> Preto majú dunajské zjazdy nízke číslo — pádluje sa tam výborne, len pod hladinou nie je nič vidieť.</p>
+<p><b>Hodnotenie</b> je vypočítané: scenéria nad hladinou (30 bodov), viditeľnosť pod vodou (40), vhodnosť na snorkeling a freedive (20), bonus za TOP 5 (10), mínus malá zrážka za obmedzenia. Nie je to hodnotenie z Google Maps — tie sa bez plateného prístupu k ich rozhraniu nedajú stiahnuť, takže scenéria je moje subjektívne číslo. Odkaz <b>Recenzie</b> na každej karte vedie na skutočné hodnotenia od ľudí.</p>
 <p><b>Čísla sú odhady, nie merania.</b> Časy jazdy sú bez zápch, viditeľnosti sú typické letné hodnoty, mýta sú orientačné podľa najbežnejšej trasy. Pravidlá pre SUP sa v AT, IT, SI a HR menia každú sezónu — čokoľvek s oranžovou alebo červenou značkou si over pred cestou.</p>
 <p>Funguje offline — žiadne externé skripty ani fonty. Palivo je spiatočné, počítané ako čas × 75 km/h.</p>
 <p>Obrysy štátov a jazier: <b>Natural Earth</b> (public domain), zjednodušené a vložené priamo v súbore. Mapa slúži na orientáciu, nie na navigáciu — na tú je pri každej lokalite odkaz do Google Maps.</p>`},
- en:{lang:"SK",dark:"Dark mode",light:"Light mode",
+ en:{lang:"SK",dark:"Dark mode",light:"Light mode",sun:"Sunlight",sunOff:"Normal",
   h1:'Paddleboard and freedive <em>from Bratislava</em>',
   sub:"56 waters within 9 hours' drive of Bratislava, ranked by what you can actually see underwater. Ultra-low-budget: tent, own food, a Yaris.",
   chartTitle:"Depth sounding: drive time vs. visibility",chartHint:"Click a dot → jumps to its card",
   mapTitle:"Map: where it all sits",mapHint:"Rings = drive time from Bratislava",
   segChart:"Sounding",segMap:"Map",gmap:"↗ My Google map",
   legend:["lake","sea","river","The lower the dot, the clearer the water.","Rings = 2.5 / 5 / 9 hours' drive from Bratislava."],
-  lC:"Countries",lW:"Water type",lD:"Trip length",lS:"Sort by",lF:"Freedive-worthy only (5 m+)",
+  lC:"Countries",lW:"Water type",lD:"Trip length",lS:"Sort by",lF:"Underwater",
   lLkm:"Fuel l/100 km",lEur:"Fuel price €/l",lQ:"Search",lV:"Vignettes I already have",
   lMaxH:"Drive time at most",lMinV:"Visibility at least",lMaxC:"Trip cost at most",
   reset:"Clear filters",
@@ -639,12 +660,12 @@ const I18N={
   fCst:c=>c>=300?"no limit":`under €${c}`,
   cname:{AT:"Austria",SK:"Slovakia",SI:"Slovenia",IT:"Italy",
     HR:"Croatia",DE:"Germany",PL:"Poland",HU:"Hungary",CH:"Switzerland"},
-  tipF:"Keeps only water where freediving makes sense — roughly 5 m visibility and up. Drops 14 spots: murky rivers, Neusiedler See and shallow gravel pits.",
   qph:"Krk, Soča, camp…",all:"All",
   water:{jazero:"Lake",more:"Sea",rieka:"River"},
   dur:{1:"Day trip — under 2.5 h",2:"Weekend — 3 to 5 h",3:"Long weekend — 6 to 9 h"},
   durShort:{1:"Day trip",2:"Weekend",3:"Long weekend"},
   wShort:{jazero:"lake",more:"sea",rieka:"river"},
+  uw:{all:"Any",snork:"Snorkeling at least (2 m+)",free:"Freediving (5 m+)"},
   sort:{rating:"Rating",vis:"Visibility",time:"Drive time",cost:"Trip cost"},
   sleep:{K2:"Camp on the water",K1:"Camp nearby",A:"Car at the lot",X:"Nothing nearby"},
   kRate:"Rating",kVis:"See",kSup:"Put-in",kSleep:"Sleep",kToll:"Tolls",
@@ -660,7 +681,7 @@ const I18N={
   banLead:"Eight places where going on or into the water is banned. They're listed because they're exactly what comes up when you search for “most beautiful lake” — and you'd drive eight hours for nothing.",
   thB:["Place","What applies"],
   foot:`<p><b>Sleeping.</b> <em>Camp on the water</em> = an official campsite right on the shore. <em>Camp nearby</em> = within roughly 10 km. <em>Car at the lot</em> = the campsite is far or absent; sleeping in the car is usually tolerated outside high season. <em>Nothing nearby</em> = plan it as a day trip. <b>Wild camping is banned and fined in AT, IT, SI and HR</b>, especially in protected areas.</p>
-<p><b>The rating is computed</b>, not invented: underwater visibility (55 points), freedive suitability (25), a TOP 5 bonus (12), minus a penalty for restrictions — 16 points where rules need checking, 5 for a minor caveat. <b>It scores the water, not the trip.</b> That is why the Danube runs rank low — the paddling is great, there is just nothing to see below the surface.</p>
+<p><b>The rating is computed</b>: scenery above the water (30 points), underwater visibility (40), snorkeling and freediving suitability (20), a TOP 5 bonus (10), minus a small penalty for restrictions. It is not a Google Maps rating — those cannot be pulled without paid API access, so the scenery figure is my own judgement. The <b>Reviews</b> link on each card leads to real ratings from people.</p>
 <p><b>These are estimates, not measurements.</b> Drive times assume no traffic, visibility figures are typical summer values, tolls are indicative for the most common route. SUP rules in AT, IT, SI and HR change every season — verify anything with an orange or red marker before you go.</p>
 <p>Works offline — no external scripts or fonts. Fuel is round trip, calculated as time × 75 km/h.</p>
 <p>Country and lake outlines: <b>Natural Earth</b> (public domain), simplified and embedded in the file. The map is for orientation, not navigation — each spot links out to Google Maps for that.</p>`}
@@ -675,7 +696,7 @@ const mix=(a,b,p)=>a.map((v,i)=>Math.round(v+(b[i]-v)*p));
 const visColor=v=>`rgb(${mix([154,139,98],[29,127,184],Math.min(v/22,1)).join(",")})`;
 const wColor=w=>w==="more"?"var(--w-sea)":w==="rieka"?"var(--w-river)":"var(--w-lake)";
 let SEL=null;
-const fuel=h=>h*75*2/100*(+$("lkm").value||5.5)*(+$("eur").value||1.55);
+const fuel=h=>h*75*2/100*(+$("lkm").value||5.5)*(+$("eur").value||1.80);
 /* Približné súradnice lokalít [lat, lon] — na schematickú mapu, nie na navigáciu. */
 const CO={
 "Dunaj — Hainburg → Devín":[48.15,16.95],"Dunaj — Štúrovo → Szob":[47.80,18.72],
@@ -712,14 +733,20 @@ const tollKeys=(n,co)=>{const o=owned();
   return (OVERRIDE[n]||BYLAND[co]||[]).filter(k=>!o.has(k))};
 const tollSum=(n,co)=>tollKeys(n,co).reduce((s,k)=>s+T[k][1],0);
 const trip=x=>fuel(x[4])+tollSum(x[0],x[2]);
-/* Hodnotenie 0–100. Váhy: viditeľnosť je hlavné kritérium, freedive vhodnosť druhé,
-   TOP 5 je môj subjektívny bonus (jedinečnosť, prístup len z vody), obmedzenia sťahujú dole. */
+/* Scenéria 0–3: aké silné je to miesto nad hladinou. Subjektívne, moje hodnotenie. */
+const SC3=["Cres — Sv. Ivan", "Stara Baška — Krk", "Kamenjak — Premantura", "Soča — Čezsoča → Srpenica 1", "Lago di Molveno", "Gosausee", "Hallstätter See", "Lago di Garda — sever", "Plansee + Heiterwanger See", "Eibsee", "Walensee", "Urnersee — Vierwaldstättersee", "Blindsee", "Fernsteinsee", "Leopoldsteinersee", "Bohinjské jazero", "Weissensee", "Zrmanja", "Achensee", "Caumasee — Flims", "Lago di Tenno", "Lago di Barcis", "Almsee", "Attersee", "Traunsee"];
+const SC1=["Neusiedler See", "Tisza-tó", "Lupa-tó", "Dunaj — Štúrovo → Szob", "Wörthersee", "Pressegger See", "Zakrzówek — Krakov"];
+const scen=n=>SC3.includes(n)?3:SC1.includes(n)?1:2;
+/* Hodnotenie 0–100 — kvalita zážitku, nie len čistota vody.
+   Scenéria 30 b, viditeľnosť 40 b, vhodnosť pod hladinu 20 b, TOP 5 bonus 10 b.
+   Obmedzenia sťahujú len mierne — permitka nerobí z výborného miesta zlé. */
 function score(x){
-  const vis=Math.min(((x[5]+x[6])/2)/25,1)*55;   // 0–55
-  const fd=(x[7]/3)*25;                          // 0–25
-  const top=x[9]?12:0;                           // 12
-  const pen=x[8]===2?16:x[8]===1?5:0;            // −16 / −5
-  return Math.max(0,Math.min(100,Math.round(vis+fd+top+8-pen)));
+  const vis=Math.min(((x[5]+x[6])/2)/25,1)*40;
+  const fd=(x[7]/3)*20;
+  const sc=(scen(x[0])/3)*30;
+  const top=x[9]?10:0;
+  const pen=x[8]===2?6:x[8]===1?2:0;
+  return Math.max(0,Math.min(100,Math.round(vis+fd+sc+top-pen)));
 }
 const stars=v=>{const n=Math.max(1,Math.min(5,Math.round(v/20)));
   return "★".repeat(n)+"☆".repeat(5-n)};
@@ -741,7 +768,7 @@ function chrome(){
       MODE==="map"?c.legend[4]:c.legend[3]}</span>`;
   ["C","W","D","S","F","Lkm","Eur","Q","V","MaxH","MinV","MaxC"]
     .forEach(k=>$("l"+k).textContent=c["l"+k]);
-  $("q").placeholder=c.qph; $("lF").parentNode.title=c.tipF; $("reset").textContent=c.reset;
+  $("q").placeholder=c.qph; $("reset").textContent=c.reset;
 
   const had=$("vig").children.length
     ? new Set([...document.querySelectorAll("#vig input:checked")].map(i=>i.value))
@@ -751,13 +778,14 @@ function chrome(){
       L==="sk"?T[k][2]:T[k][3]} <span class="n">${
       L==="sk"?num(T[k][1])+" €":"€"+num(T[k][1])}</span></label>`).join("");
 
-  const keep={fC:$("fC").value,fW:$("fW").value,fD:$("fD").value,fS:$("fS").value};
+  const keep={fC:$("fC").value,fW:$("fW").value,fD:$("fD").value,fS:$("fS").value,fF:$("fF").value};
   const opt=(id,pairs)=>{$(id).innerHTML=pairs.map(([v,l])=>
     `<option value="${v}">${l}</option>`).join("");};
   opt("fC",[["all",c.all],...[...new Set(D.map(r=>r[2]))].sort()
     .map(x=>[x,`${c.cname[x]||x} (${x})`])]);
   opt("fW",[["all",c.all],...Object.entries(c.water).map(([k,v])=>[k,v])]);
   opt("fD",[["all",c.all],...[1,2,3].map(k=>[k,c.dur[k]])]);
+  opt("fF",Object.entries(c.uw).map(([k,v])=>[k,v]));
   opt("fS",Object.entries(c.sort).map(([k,v])=>[k,v]));
   Object.entries(keep).forEach(([id,v])=>{if(v)$(id).value=v});
 
@@ -776,10 +804,10 @@ function chrome(){
 
 function view(){
   const cy=$("fC").value,w=$("fW").value,d=$("fD").value,
-        q=$("q").value.trim().toLowerCase(),f=$("fF").checked,s=$("fS").value,
+        q=$("q").value.trim().toLowerCase(),f=$("fF").value,s=$("fS").value,
         mh=+$("maxH").value,mv=+$("minV").value,mc=+$("maxC").value;
   const r=D.filter(x=>(cy==="all"||x[2]===cy)&&(w==="all"||x[3]===w)
-    &&(d==="all"||x[1]==+d)&&(!f||x[7]>=2)
+    &&(d==="all"||x[1]==+d)&&(f==="all"||x[7]>=(f==="free"?2:1))
     &&x[4]<=mh&&x[6]>=mv&&(mc>=300||trip(x)<=mc)
     &&(!q||(x[0]+" "+txt(x).join(" ")).toLowerCase().includes(q)));
   r.sort((a,b)=>s==="time"?a[4]-b[4]:s==="cost"?trip(a)-trip(b):s==="rating"?score(b)-score(a)||b[6]-a[6]:(b[6]-a[6])||(a[4]-b[4]));
@@ -943,15 +971,19 @@ const draw=()=>{ranges();cards();MODE==="map"?map():chart()};
 $("vig").addEventListener("change",draw);
 $("reset").addEventListener("click",()=>{
   $("fC").value="all";$("fW").value="all";$("fD").value="all";
-  $("fF").checked=false;$("q").value="";
+  $("fF").value="all";$("q").value="";
   $("maxH").value=9;$("minV").value=0;$("maxC").value=300;SEL=null;draw()});
 
 const root=document.documentElement;
 const isDark=()=>root.getAttribute("data-theme")==="dark"
   ||(!root.hasAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);
-function themeLabel(){$("theme").textContent=isDark()?t().light:t().dark}
+const isHC=()=>root.classList.contains("hc");
+function themeLabel(){$("theme").textContent=isDark()?t().light:t().dark;
+  $("hc").textContent=isHC()?t().sunOff:t().sun;
+  $("theme").disabled=isHC(); $("theme").style.opacity=isHC()?.45:1}
 $("theme").addEventListener("click",()=>{
   root.setAttribute("data-theme",isDark()?"light":"dark");themeLabel();chart()});
+$("hc").addEventListener("click",()=>{root.classList.toggle("hc");themeLabel();draw()});
 $("lang").addEventListener("click",()=>{L=L==="sk"?"en":"sk";chrome();draw()});
 
 chrome();draw();

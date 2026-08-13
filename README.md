@@ -3,7 +3,7 @@
 Plánovač výletov na paddleboard a freedive. Jedna HTML stránka, žiadne závislosti,
 **funguje aj offline** — všetko vrátane mapových podkladov je v súbore.
 
-👉 **[Otvoriť stránku](https://vdi-dik.github.io/sup-freedive/)**
+👉 **[Otvoriť stránku](https://vdi-dik.github.io/sup/)**
 
 ## Čo to vie
 

@@ -1,0 +1,903 @@
+<title>SUP &amp; Freedive — 56 vôd do 9 h z Bratislavy</title>
+<style>
+:root{
+  --ground:#E7E5E0; --panel:#F4F3F0; --panel-2:#DBD8D1; --line:#C3BEB4;
+  --ink:#1A2030; --ink-2:#4A5265; --ink-3:#7C8394;
+  --accent:#1D5FA8; --accent-soft:#DBE5F1;
+  --good:#3D7A4E; --warn:#A8730F; --crit:#B0392B;
+  --murk:#9A8B62; --clear:#1D7FB8;
+  --w-lake:#1D7FB8; --w-sea:#0E8C7F; --w-river:#B5772A;
+  --shadow:0 1px 2px rgba(26,32,48,.08),0 8px 22px -14px rgba(26,32,48,.3);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#161A22; --panel:#1E232E; --panel-2:#2A3140; --line:#3A4354;
+  --ink:#E8E6E1; --ink-2:#B0B5C0; --ink-3:#828A99;
+  --accent:#6FA8E8; --accent-soft:#22364F;
+  --good:#67B57E; --warn:#D9A63F; --crit:#E07060;
+  --murk:#B0A177; --clear:#4FA8D8;
+  --w-lake:#4FA8D8; --w-sea:#3ECAB4; --w-river:#E0A455;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px -14px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --ground:#161A22; --panel:#1E232E; --panel-2:#2A3140; --line:#3A4354;
+  --ink:#E8E6E1; --ink-2:#B0B5C0; --ink-3:#828A99;
+  --accent:#6FA8E8; --accent-soft:#22364F;
+  --good:#67B57E; --warn:#D9A63F; --crit:#E07060;
+  --murk:#B0A177; --clear:#4FA8D8;
+  --w-lake:#4FA8D8; --w-sea:#3ECAB4; --w-river:#E0A455;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:Charter,"Bitstream Charter","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+h1,h2,h3,.disp{font-family:"Avenir Next Condensed","Helvetica Neue Condensed",
+  "Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  font-weight:600;letter-spacing:.005em;text-wrap:balance;margin:0}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+header{border-bottom:1px solid var(--line);background:var(--panel)}
+.hbar{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
+  justify-content:space-between;padding:26px 0 20px}
+h1{font-size:clamp(26px,4.4vw,40px);line-height:1.02}
+h1 em{font-style:normal;color:var(--accent)}
+.sub{color:var(--ink-2);font-size:14.5px;margin-top:7px;max-width:60ch}
+.hbtns{display:flex;gap:8px}
+.tbtn{font-family:inherit;font-size:13px;color:var(--ink-2);background:var(--panel-2);
+  border:1px solid var(--line);border-radius:2px;padding:7px 13px;cursor:pointer}
+.tbtn:hover{color:var(--ink)}
+.tbtn:focus-visible,select:focus-visible,input:focus-visible,button:focus-visible,
+circle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.chartbox{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:18px 16px 8px;margin:26px 0;position:relative}
+.tip{position:absolute;pointer-events:none;z-index:5;background:var(--ink);
+  color:var(--panel);padding:5px 9px;border-radius:2px;font-size:12.5px;
+  white-space:nowrap;transform:translate(-50%,-150%);box-shadow:var(--shadow);
+  font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  letter-spacing:.02em}
+.tip b{font-weight:600}
+.tip i{font-style:normal;opacity:.72;font-family:ui-monospace,Menlo,monospace;
+  font-size:11px;margin-left:6px}
+.tip[hidden]{display:none}
+.chead{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;
+  align-items:baseline;margin-bottom:4px}
+.eyebrow{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.chartscroll{overflow-x:auto}
+svg.depth{display:block;min-width:660px;width:100%;height:300px}
+svg.mapsvg{display:block;min-width:700px;width:100%;height:auto}
+svg.mapsvg[hidden],svg.depth[hidden]{display:none}
+.segs{display:flex;gap:0;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.seg{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;
+  background:var(--panel);color:var(--ink-3);border:0;cursor:pointer}
+.seg+.seg{border-left:1px solid var(--line)}
+.seg.on{background:var(--accent);color:var(--panel)}
+.seg:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.gmapbtn{text-decoration:none;color:var(--accent);border-color:var(--accent);white-space:nowrap;font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.gmapbtn:hover{background:var(--accent);color:var(--panel)}
+.land{fill:var(--panel-2);stroke:var(--line);stroke-width:.7;stroke-linejoin:round}
+.sea{fill:var(--accent-soft)}
+.lake{fill:var(--w-lake);fill-opacity:.35;stroke:var(--w-lake);stroke-width:.6;stroke-opacity:.6}
+.ring{fill:none;stroke:var(--accent);stroke-width:.9;stroke-dasharray:5 5;stroke-opacity:.55}
+.ringlab{font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;fill:var(--accent);opacity:.85}
+.cname-lab{font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;font-size:11.5px;
+  letter-spacing:.16em;text-transform:uppercase;fill:var(--ink-3);opacity:.75}
+.home{fill:var(--ink)}
+.homelab{font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;fill:var(--ink)}
+.dot{cursor:pointer;transition:r .15s ease}
+.dot:hover{r:9}
+.axl{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;fill:var(--ink-3)}
+.grid{stroke:var(--line);stroke-width:.5}
+.mapsvg .grid{stroke:var(--ink-3);stroke-opacity:.28}
+.legend[hidden]{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--ink-2);padding:6px 2px 4px}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:9px;height:9px;border-radius:50%}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));
+  gap:12px;margin:22px 0 8px}
+label.f{display:flex;flex-direction:column;gap:5px}
+label.f > span{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+select,input[type=text],input[type=number]{font-family:inherit;font-size:14.5px;
+  color:var(--ink);background:var(--panel);border:1px solid var(--line);
+  border-radius:2px;padding:8px 9px;width:100%}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);padding-top:20px}
+input[type=range]{width:100%;accent-color:var(--accent);background:transparent;
+  margin:6px 0 0;padding:0;height:18px}
+.rngout{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:12px;color:var(--ink-2);margin-top:1px}
+.resetwrap{display:flex;align-items:flex-end;padding-top:20px}
+.resetwrap .tbtn{width:100%}
+.ctyrow{margin:24px 0 0}
+.ctys{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px}
+.cchip{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;
+  border:1px solid var(--line);border-radius:2px;padding:5px 11px;cursor:pointer;
+  background:var(--panel);color:var(--ink-2);user-select:none}
+.cchip:hover{color:var(--ink)}
+.cchip:has(input:checked){border-color:var(--accent);color:var(--accent);
+  background:var(--accent-soft)}
+.cchip:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.cchip input{accent-color:var(--accent);margin:0}
+.cchip .n{font-family:ui-monospace,Menlo,monospace;font-size:11px;opacity:.7}
+.count{color:var(--ink-3);font-size:13.5px;margin:14px 0 16px}
+.count b{color:var(--ink);font-weight:400}
+
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  padding:16px 17px 14px;display:flex;flex-direction:column;gap:11px;
+  box-shadow:var(--shadow);scroll-margin-top:16px}
+.card.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.selmark{display:flex;align-items:center;gap:7px;margin:-2px 0 -4px;
+  font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--accent)}
+.selmark::before{content:"";width:14px;height:2px;background:var(--accent)}
+.pill.wt{background:transparent;border:1px solid currentColor}
+.ctop{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.cname{font-size:19px;line-height:1.15}
+.cflag{font-size:11.5px;letter-spacing:.11em;color:var(--ink-3);
+  font-family:ui-monospace,Menlo,monospace;white-space:nowrap;padding-top:4px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;background:var(--panel-2);color:var(--ink-2)}
+.pill.top{background:var(--accent);color:var(--panel)}
+.pill.ban{background:var(--crit);color:var(--panel)}
+.pill.perm{background:var(--warn);color:var(--panel)}
+.desc{font-size:14.5px;color:var(--ink-2);margin:0}
+.rows{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);
+  padding-top:11px;font-size:13.5px}
+.row{display:grid;grid-template-columns:74px 1fr;gap:10px;align-items:baseline}
+.row .k{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.row .v{color:var(--ink-2)}
+.stars{color:var(--accent);letter-spacing:.12em;font-size:13px}
+.visbar{height:5px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:5px}
+.visbar i{display:block;height:100%}
+.slp{display:inline-block;font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;
+  border-radius:2px;margin-right:6px;white-space:nowrap;border:1px solid transparent}
+.slp.K2{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.slp.K1{background:var(--panel-2);color:var(--ink-2);border-color:var(--line)}
+.slp.A{background:transparent;color:var(--warn);border-color:var(--warn)}
+.slp.X{background:transparent;color:var(--ink-3);border-color:var(--line)}
+.warnbox{font-size:13.5px;padding:9px 11px;border-radius:2px;
+  background:var(--accent-soft);color:var(--ink);border-left:3px solid var(--warn)}
+.warnbox.hard{border-left-color:var(--crit)}
+.cfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-top:1px solid var(--line);padding-top:11px;font-size:13.5px}
+.cost{color:var(--ink-2)}
+.cost b{color:var(--ink);font-weight:400}
+a.map{color:var(--accent);text-decoration:none;font-size:12px;letter-spacing:.09em;
+  text-transform:uppercase;font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;
+  border-bottom:1px solid var(--accent);padding-bottom:1px;white-space:nowrap}
+a.map:hover{color:var(--ink);border-color:var(--ink)}
+
+.panelbox{margin:44px 0 0;background:var(--panel);border:1px solid var(--line);
+  border-radius:3px;padding:20px 18px}
+.panelbox h2{font-size:22px;margin-bottom:4px}
+.panelbox p.lead{color:var(--ink-2);font-size:14.5px;margin:6px 0 16px;max-width:70ch}
+.bantab{width:100%;border-collapse:collapse;font-size:14px}
+.bantab th{text-align:left;font-family:"Avenir Next Condensed","Roboto Condensed",sans-serif;
+  font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--line);padding:0 10px 7px 0}
+.bantab td{border-bottom:1px solid var(--line);padding:9px 10px 9px 0;
+  color:var(--ink-2);vertical-align:top}
+.bantab td:first-child{color:var(--ink);white-space:nowrap}
+.tabscroll{overflow-x:auto}
+
+footer{border-top:1px solid var(--line);margin-top:44px;padding:22px 0 40px;
+  color:var(--ink-3);font-size:13px}
+footer p{margin:0 0 7px;max-width:72ch}
+footer b{color:var(--ink-2);font-weight:400}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header>
+  <div class="wrap hbar">
+    <div>
+      <h1 id="h1"></h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="hbtns">
+      <button class="tbtn" id="lang">EN</button>
+      <button class="tbtn" id="theme"></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="chartbox">
+    <div class="chead">
+      <h2 class="disp" style="font-size:19px" id="chartTitle"></h2>
+      <div class="segs">
+        <button class="seg on" id="segChart" data-v="chart"></button>
+        <button class="seg" id="segMap" data-v="map"></button>
+      </div>
+      <a class="tbtn gmapbtn" id="gmap" target="_blank" rel="noopener"
+        href="https://www.google.com/maps/d/viewer?mid=12yUS0svArYSvkcMHvIJfwbXHlj0QaVQ"></a>
+      <span class="eyebrow" id="chartHint"></span>
+    </div>
+    <div class="chartscroll">
+      <svg class="depth" id="chart" viewBox="0 0 900 300" preserveAspectRatio="none" role="img"></svg>
+      <svg class="mapsvg" id="map" viewBox="0 0 900 600" role="img" hidden></svg>      </div>
+    </div>
+    <div class="tip" id="tip" hidden></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="controls">
+    <label class="f"><span id="lC"></span><select id="fC"></select></label>
+    <label class="f"><span id="lW"></span><select id="fW"></select></label>
+    <label class="f"><span id="lD"></span><select id="fD"></select></label>
+    <label class="f"><span id="lS"></span><select id="fS"></select></label>
+    <label class="f"><span id="lQ"></span><input type="text" id="q"></label>
+  </section>
+
+  <section class="controls" style="margin-top:4px">
+    <label class="f"><span id="lMaxH"></span>
+      <input type="range" id="maxH" min="0.5" max="9" step="0.25" value="9">
+      <output class="rngout" id="oMaxH"></output></label>
+    <label class="f"><span id="lMinV"></span>
+      <input type="range" id="minV" min="0" max="30" step="1" value="0">
+      <output class="rngout" id="oMinV"></output></label>
+    <label class="f"><span id="lMaxC"></span>
+      <input type="range" id="maxC" min="20" max="300" step="10" value="300">
+      <output class="rngout" id="oMaxC"></output></label>
+    <div class="resetwrap"><button class="tbtn" id="reset"></button></div>
+  </section>
+
+  <section class="controls" style="margin-top:4px">
+    <label class="f"><span id="lLkm"></span>
+      <input type="number" id="lkm" value="5.5" step="0.1" min="1"></label>
+    <label class="f"><span id="lEur"></span>
+      <input type="number" id="eur" value="1.55" step="0.01" min="0.1"></label>
+    <label class="chk"><input type="checkbox" id="fF"> <span id="lF"></span></label>
+  </section>
+
+  <section class="ctyrow">
+    <span class="eyebrow" id="lV"></span>
+    <div class="ctys" id="vig"></div>
+  </section>
+
+  <p class="count" id="count"></p>
+  <div class="grid-cards" id="cards"></div>
+
+  <section class="panelbox">
+    <h2 class="disp" id="tollTitle"></h2>
+    <p class="lead" id="tollLead"></p>
+    <div class="tabscroll"><table class="bantab">
+      <thead><tr><th id="thT1"></th><th style="text-align:right" id="thT2"></th>
+        <th id="thT3"></th></tr></thead>
+      <tbody id="tolls"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panelbox">
+    <h2 class="disp" id="banTitle"></h2>
+    <p class="lead" id="banLead"></p>
+    <div class="tabscroll"><table class="bantab">
+      <thead><tr><th id="thB1"></th><th id="thB2"></th></tr></thead>
+      <tbody id="bans"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<footer class="wrap" id="foot"></footer>
+
+<script>
+/* ── data ───────────────────────────────────────────────────────────────
+   [name, cat, country, water, hours, visMin, visMax, freedive0-3,
+    flag(0 none/1 heads-up/2 check), top5, sleepCode,
+    sk:[desc, put-in, sleepText, note], en:[…]]                          */
+const D=[
+["Dunaj — Hainburg → Devín",1,"AT","rieka",0.5,1,2,0,1,0,"X",
+ ["Prielom Dunaja medzi Hainburgom a Devínom. Národný park Donau-Auen po oboch brehoch, hrad Devín ako finále. Veľká rieka, hladký silný prúd.","~15 km po prúde, prúd ťa nesie a pádluješ len na korekciu. Dá sa pokračovať do Karloveského ramena. Najlepšie ráno, kým nefúka proti prúdu.","Jednodňovka — nič netreba, návrat autom alebo MHD z Devína","Hlavná plavebná dráha s nákladnou dopravou. Drž sa pri brehu a rátaj s vlnami od lodí."],
+ ["The Danube gorge between Hainburg and Devín. Donau-Auen national park on both banks, Devín castle as the finale. Big river, smooth strong current.","~15 km downstream; the current carries you and you paddle only to steer. You can continue into the Karlova Ves channel. Best in the morning, before the headwind picks up.","Day trip — nothing needed, drive or take transit back from Devín","A main shipping lane with cargo traffic. Stay near the bank and expect wash from ships."]],
+["Dunaj — Štúrovo → Szob",1,"SK","rieka",1.8,1,2,0,1,0,"K1",
+ ["Začiatok Dunajského ohybu. Ostrihomská bazilika nad hlavou, ďalej sa rieka zatáča medzi Börzsöny a Pilis. Toto už poznáte.","~8 km po prúde, dá sa natiahnuť na Zebegény a Nagymaros. Prúd pomáha celý čas — na dlhý pohodový deň ideálne.","Kempy pri Štúrove a na maďarskom brehu","Nákladná doprava a vlny od výletných lodí. Návrat z výstupu si vyrieš vopred — druhé auto alebo vlak."],
+ ["The start of the Danube Bend. The Esztergom basilica overhead, then the river curves between the Börzsöny and Pilis hills. You already know this one.","~8 km downstream, extendable to Zebegény and Nagymaros. The current helps the whole way — ideal for a long easy day.","Campsites near Štúrovo and on the Hungarian bank","Cargo traffic and wash from cruise boats. Sort the return from your take-out in advance — a second car or the train."]],
+["Neusiedler See",1,"AT","jazero",1,0,0.3,0,0,0,"K2",
+ ["Obrovský horizont a trstinové pásy. Úplne iná estetika ako hory.","Downwind Podersdorf → Illmitz pri severáku. Tréning na vietor pred morom.","Storchencamp Podersdorf — lacný, v sezóne plný",""],
+ ["A vast horizon and reed belts. A completely different look from the mountains.","Downwind Podersdorf → Illmitz on a northerly. Wind practice before the sea.","Storchencamp Podersdorf — cheap, packed in season",""]],
+["Lupa-tó",1,"HU","jazero",2,4,6,1,1,0,"K1",
+ ["Biely piesok a tyrkysová štrkovňa na okraji Budapešti.","Pokojná hladina, dobrá na nácvik s tandemom.","Stan v okolí Lupa Beach","Platený vstup, je to vybudované kúpalisko — nie divoká príroda."],
+ ["White sand and a turquoise gravel pit on the edge of Budapest.","Calm surface, good for tandem practice.","Tent pitches around Lupa Beach","Paid entry — it's a built-up lido, not wild nature."]],
+["Stausee Ottenstein",1,"AT","jazero",1.75,2,4,1,0,0,"K2",
+ ["Rozvetvené fjordovité ramená v lese, žulové brehy, skoro nikto.","Nástup Lichtenfels, prieskum bočných ramien k Dobra.","Camping Ottenstein priamo pri vode",""],
+ ["Branching fjord-like arms in forest, granite banks, almost nobody.","Put in at Lichtenfels, explore the side arms toward Dobra.","Camping Ottenstein right on the water",""]],
+["Lunzer See",1,"AT","jazero",2.25,4,8,2,0,0,"K2",
+ ["Kompaktné jazero pod Ötscherom, lesnaté svahy padajúce do vody.","Okruh ~4 km. Západný breh je najstrmší — najlepší na freedive pozdĺž steny.","Camping Lunz am See, pár minút od brehu",""],
+ ["A compact lake below the Ötscher, wooded slopes dropping into the water.","~4 km loop. The west shore is steepest — best for freediving along the wall.","Camping Lunz am See, minutes from the shore",""]],
+["Erlaufsee",1,"AT","jazero",2.5,10,15,3,0,1,"A",
+ ["Tyrkysovo-smaragdová farba, biele vápencové dno, strmé steny pod hladinou.","Nástup z pláže na juhu, prejsť k severnému brehu — stena padá kolmo do hĺbky.","Kemp Mariazell 6 km, inak sa dá prespať v aute na parkovisku",""],
+ ["Turquoise-emerald water, white limestone bottom, steep walls below the surface.","Put in at the south beach, cross to the north shore — the wall drops vertically.","Campsite in Mariazell 6 km away, otherwise sleeping in the car at the lot works",""]],
+["Walensee",3,"CH","jazero",8,8,15,3,0,0,"K2",
+ ["Steny Churfirsten padajú 2000 m priamo do vody. Vodopády Seerenbach na severnom brehu, ktoré nemajú prístup z cesty.","Nástup Walenstadt alebo Murg, na sever popod Churfirsten k Seerenbachu. Strmé podvodné steny hneď za brehom.","Camping Walensee (Unterterzen), kempy pri Murgu",""],
+ ["The Churfirsten walls drop 2000 m straight into the water. The Seerenbach falls on the north shore have no road access.","Put in at Walenstadt or Murg, north under the Churfirsten to the Seerenbach. Steep underwater walls just off the bank.","Camping Walensee (Unterterzen), campsites at Murg",""]],
+["Urnersee — Vierwaldstättersee",3,"CH","jazero",8.5,8,12,3,0,0,"K2",
+ ["Južné rameno Lucernského jazera — najfjordovitejšia časť, steny Uri Rotstock, lúka Rütli.","Nástup Flüelen alebo Isleten, na sever popri západnom brehu. Popoludní fúka Föhn — choď ráno.","Camping Windgällen (Flüelen), Camping Gotthard",""],
+ ["The southern arm of Lake Lucerne — the most fjord-like part, the Uri Rotstock walls, the Rütli meadow.","Put in at Flüelen or Isleten, north along the west shore. The Föhn blows in the afternoon — go early.","Camping Windgällen (Flüelen), Camping Gotthard",""]],
+["Caumasee — Flims",3,"CH","jazero",8,8,12,3,2,0,"K1",
+ ["Tyrkysové lesné jazero na terase nad Rýnskou roklinou. Farba, ktorá nemá v Alpách veľa konkurencie.","Malé jazero, okruh do 2 km — ide o farbu a freedive, nie o kilometre.","Kempy vo Flims a Laax",
+  "Malé jazero v chránenej zóne s plateným vstupom a vlastnou lodenicou — súkromné plavidlá môžu byť zakázané. Over pred cestou."],
+ ["A turquoise forest lake on a terrace above the Rhine gorge. A colour with little competition in the Alps.","A small lake, under a 2 km loop — this is about the colour and the freediving, not distance.","Campsites in Flims and Laax",
+  "A small lake in a protected zone with paid entry and its own boathouse — private craft may be banned. Check before you go."]],
+["Leopoldsteinersee",2,"AT","jazero",3,8,12,3,2,0,"K1",
+ ["Kolmá stena Pfaffensteinu padá priamo do jazera. Najfotogenickejšie malé jazero Štajerska.","Ak by SUP vyšiel: nástup pri parkovisku na juhu, pod stenu Pfaffensteinu.","Kemp v Eisenerz, ~3 km","Pravdepodobne ZAKÁZANÉ pre súkromné paddleboardy — len licencované loďky z požičovne a taxi-čln. Ferrata Kaiser Franz Josef výlet udrží aj tak."],
+ ["The vertical Pfaffenstein wall drops straight into the lake. The most photogenic small lake in Styria.","If SUP is allowed: put in at the south car park, head under the Pfaffenstein wall.","Campsite in Eisenerz, ~3 km","Probably BANNED for private boards — only licensed rental boats and a boat taxi. The Kaiser Franz Josef via ferrata carries the trip anyway."]],
+["Liptovská Mara",2,"SK","jazero",3,1,2,0,0,0,"K2",
+ ["Západné Tatry a Chočské vrchy nad hladinou.","Vetrovka — dobrý downwind tréning. Nástup Liptovský Trnovec.","ATC Liptovský Trnovec",""],
+ ["The Western Tatras and Chočské vrchy above the water.","Windy — good downwind practice. Put in at Liptovský Trnovec.","ATC Liptovský Trnovec",""]],
+["Tisza-tó",2,"HU","jazero",3,0.5,1,0,0,0,"K1",
+ ["Labyrint zatopeného lesa a kanálov, hniezdiská vtáctva.","Nástup Poroszló, bludisko kanálov. Drž 25 m od trstín.","Kempy pri Poroszló",""],
+ ["A labyrinth of flooded forest and channels, bird nesting grounds.","Put in at Poroszló into the channel maze. Keep 25 m off the reeds.","Campsites near Poroszló",""]],
+["Almsee",2,"AT","jazero",3.5,8,12,2,1,0,"K1",
+ ["Totes Gebirge kolmo nad hladinou, mokraď na severnom konci. Azda najkrajšia kulisa Horného Rakúska.","Ak je plavba povolená: od parkoviska k severnej mokradi.","Kemp v Grünau im Almtal","Chránené územie — plavba býva obmedzená alebo zakázaná. Over, inak to ostáva hikingová zastávka."],
+ ["The Totes Gebirge straight above the water, wetland at the north end. Perhaps the finest backdrop in Upper Austria.","If boating is allowed: from the car park to the northern wetland.","Campsite in Grünau im Almtal","Protected area — boating is often restricted or banned. Check, or it stays a hiking stop."]],
+["Attersee",2,"AT","jazero",3.5,10,20,3,0,1,"K2",
+ ["Východný breh Steinbach–Weissenbach je divoký, skalné steny nad vodou. Šťuky, pstruhy, raky.","Nástup Weissenbach, na sever pozdĺž skalnej steny. Pod hladinou strmé plotny.","Camping Weissenbach aj Steinbach priamo pri vode",""],
+ ["The east shore Steinbach–Weissenbach is wild, rock walls above the water. Pike, trout, crayfish.","Put in at Weissenbach, north along the rock face. Steep slabs below the surface.","Camping Weissenbach and Steinbach, both on the water",""]],
+["Traunsee",2,"AT","jazero",3.5,8,15,3,0,0,"K2",
+ ["Stena Traunsteinu spadá do vody. Najhlbšie rakúske jazero, 191 m.","Nástup Traunkirchen, popri východnom brehu pod Traunstein. Drž sa do 100 m od brehu.","Camping Traunsee (Altmünster), Camping Ebensee",""],
+ ["The Traunstein wall falls into the water. Austria's deepest lake at 191 m.","Put in at Traunkirchen, along the east shore under the Traunstein. Stay within 100 m of shore.","Camping Traunsee (Altmünster), Camping Ebensee",""]],
+["Mondsee",2,"AT","jazero",3.5,5,8,2,0,0,"K2",
+ ["Stena Drachenwand nad južným brehom. Najteplejšie zo Salzkammergutu, až 26 °C.","Nástup pod Drachenwand (Plomberg), krátky okruh 5–6 km popri stene.","Camping Mond-See-Land, Camping Austria",""],
+ ["The Drachenwand face above the south shore. Warmest in the Salzkammergut, up to 26 °C.","Put in below the Drachenwand (Plomberg), a short 5–6 km loop along the wall.","Camping Mond-See-Land, Camping Austria",""]],
+["Fuschlsee",2,"AT","jazero",3.5,8,12,3,0,0,"K1",
+ ["Celoročný zákaz motorových člnov — jedna z najtichších vôd Salzkammergutu.","Okruh po obvode, trstinové plytčiny na pozorovanie ostriežov a šťúk.","Kempy pri Fuschl am See",""],
+ ["A year-round motorboat ban — one of the quietest waters in the Salzkammergut.","Loop the shoreline; reed shallows for watching perch and pike.","Campsites near Fuschl am See",""]],
+["Wolfgangsee",2,"AT","jazero",3.75,6,10,2,0,0,"K2",
+ ["Kulisa Schafbergu, tiché zátoky medzi Sankt Gilgen a Fürberg.","Nástup Sankt Gilgen, na východ k Fürberg — zátoky neprístupné z cesty.","Camping Appesbach, Camping Lindenstrand",""],
+ ["The Schafberg backdrop, quiet bays between Sankt Gilgen and Fürberg.","Put in at Sankt Gilgen, east toward Fürberg — bays unreachable by road.","Camping Appesbach, Camping Lindenstrand",""]],
+["Hallstätter See",2,"AT","jazero",3.75,6,10,2,0,0,"K2",
+ ["Dachsteinské steny nad vodou. Samotný Hallstatt je turistické peklo — ostaň na vode.","Nástup Obertraun, popri západnom brehu — je bez cesty a takmer prázdny.","Klausner-Höll (Hallstatt), Camping am See (Obertraun)",""],
+ ["Dachstein walls above the water. Hallstatt itself is tourist hell — stay on the water.","Put in at Obertraun, along the west shore — roadless and almost empty.","Klausner-Höll (Hallstatt), Camping am See (Obertraun)",""]],
+["Gosausee",2,"AT","jazero",4,8,15,2,0,0,"K1",
+ ["Zrkadlový odraz Dachsteinského ľadovca. Jedna z najsilnejších scenérií Álp.","<b>Paddleboard je tu bez problémov povolený — overené na mieste.</b> Od parkoviska k západnému koncu pod ľadovec. Ľadová voda, 12–16 °C.","Camping Gosau (Gosauschmied)",""],
+ ["A mirror reflection of the Dachstein glacier. One of the strongest views in the Alps.","<b>Paddleboarding is allowed here without any issue — verified on site.</b> From the car park to the west end below the glacier. Icy water, 12–16 °C.","Camping Gosau (Gosauschmied)",""]],
+["Palcmanská Maša — Dedinky",2,"SK","jazero",4,2,4,1,0,0,"K2",
+ ["Slovenský raj priamo nad hladinou, Havrania skala.","Okruh nádržou ~5 km. Ráno SUP, poobede Zejmarská roklina.","ATC Dedinky, autokemp Mlynky",""],
+ ["Slovak Paradise right above the water, Havrania skala.","~5 km loop of the reservoir. SUP in the morning, Zejmarská gorge after.","ATC Dedinky, Mlynky car camp",""]],
+["Jezioro Czorsztyńskie",2,"PL","jazero",4,2,4,1,0,0,"K2",
+ ["Hrady Czorsztyn a Niedzica proti sebe nad vodou, Pieniny v pozadí.","Nástup Kluszkowce k hradu Niedzica. Okolo vedie cyklotrasa Velo Czorsztyn, 44 km.","Camping Łęg (Frydman) — 9 ha priamo pri jazere",""],
+ ["Czorsztyn and Niedzica castles facing each other above the water, Pieniny behind.","Put in at Kluszkowce toward Niedzica castle. The 44 km Velo Czorsztyn cycle route rings the lake.","Camping Łęg (Frydman) — 9 ha right on the lake",""]],
+["Wörthersee",2,"AT","jazero",4.25,4,6,1,0,0,"K2",
+ ["Najteplejšie veľké alpské jazero, 26–28 °C. Západný koniec má tiché zalesnené brehy.","Nástup Reifnitz alebo Sekirn, pádlovať na západ. Východ je komerčný — vynechaj.","Camping Sabotnik, Camping Reichmann (Sekirn)",""],
+ ["The warmest large alpine lake, 26–28 °C. The west end has quiet wooded shores.","Put in at Reifnitz or Sekirn and paddle west. The east end is commercial — skip it.","Camping Sabotnik, Camping Reichmann (Sekirn)",""]],
+["Bledské jazero",2,"SI","jazero",4.5,5,8,1,2,0,"K1",
+ ["Ostrov s kostolom, hrad na skale. Vizuálne top, ale preplnené.","Jediný zmysel: pádlovať o 6:00, keď je hmla nad vodou a jazero prázdne.","Camping Šobec (Lesce), 4 km — lacnejší než Camping Bled","Vlastný SUP vyžaduje platenú koncesiu. Over cenu a spôsob kúpy vopred."],
+ ["The island church, the castle on its cliff. Visually top, but crowded.","Only worth it at 06:00, with mist on the water and the lake empty.","Camping Šobec (Lesce), 4 km — cheaper than Camping Bled","Your own SUP needs a paid permit. Check the price and where to buy it beforehand."]],
+["Millstätter See",2,"AT","jazero",4.5,5,8,2,0,0,"K2",
+ ["Najhlbšie korutánske jazero, Nockberge nad severným brehom.","Nástup Döbriach, popri južnom brehu — je strmší a tichší.","Kempy pri Döbriach",""],
+ ["Carinthia's deepest lake, the Nockberge above the north shore.","Put in at Döbriach, along the south shore — steeper and quieter.","Campsites at Döbriach",""]],
+["Faaker See",2,"AT","jazero",4.5,6,10,2,0,0,"K2",
+ ["Karibská tyrkysová farba pod Mittagskogelom, ostrovček uprostred.","Nástup Drobollach, okruh okolo ostrova ~6 km. Motorové lode zakázané.","Camping Poglitsch, Camping Arneitz",""],
+ ["Caribbean turquoise below the Mittagskogel, a small island in the middle.","Put in at Drobollach, ~6 km loop around the island. Motorboats banned.","Camping Poglitsch, Camping Arneitz",""]],
+["Pressegger See",2,"AT","jazero",4.5,4,6,1,0,0,"K2",
+ ["Až 28 °C — najteplejšie jazero Korutánska. Mokraď a trstina na severe.","Od kempu do trstinových kanálov na severnej strane. Drž odstup od hniezdisk.","Camping Weisses Rössl priamo na brehu",""],
+ ["Up to 28 °C — the warmest lake in Carinthia. Wetland and reeds to the north.","From the campsite into the reed channels on the north side. Keep clear of nesting areas.","Camping Weisses Rössl right on the shore",""]],
+["Zakrzówek — Krakov",2,"PL","jazero",4.5,8,15,3,2,0,"X",
+ ["Zatopený vápencový lom, strmé steny, žiarivo modrá voda.","Profil ako stvorený na freedive — ale je to mestský areál s kúpaliskom.","Nič pri vode, kempy až v Krakove","Vybudované kúpalisko s plávajúcimi bazénmi. SUP v kúpacej zóne bude skoro isto zakázaný a odporuje to podmienke „žiadne mestské trasy“."],
+ ["A flooded limestone quarry, steep walls, vivid blue water.","A profile made for freediving — but it's an urban site with a lido.","Nothing lakeside, campsites in Kraków","A built-up lido with floating pools. SUP in the swimming zone is almost certainly banned, and it contradicts the no-urban-routes rule."]],
+["Bohinjské jazero",2,"SI","jazero",4.75,6,10,2,2,0,"K1",
+ ["Julské Alpy zo všetkých strán, kostolík pri Ribčev Laz. Najkrajšie alpské jazero Slovinska.","Nástup Ukanc, na východ za svitania — vtedy je hladina zrkadlo.","Camp Danica (Boh. Bistrica) — lacnejší než Zlatorog pri vode","SUP vyžaduje platenú registráciu v Triglavskom NP. Choď v piatok večer — Bled–Bohinj stojí."],
+ ["The Julian Alps on every side, the little church at Ribčev Laz. Slovenia's finest alpine lake.","Put in at Ukanc and head east at dawn — that's when the surface is a mirror.","Camp Danica (Boh. Bistrica) — cheaper than Zlatorog on the water","SUP requires paid registration in Triglav NP. Drive Friday evening — the Bled–Bohinj road jams."]],
+["Weissensee",2,"AT","jazero",4.75,8,15,3,0,1,"K2",
+ ["Kvalita pitnej vody, zákaz motorových lodí, západná polovica bez prístupovej cesty.","Nástup Techendorf, na západ 8–10 km. Celodenná misia s obedom na brehu.","Camping Knaller aj Camping Müller priamo pri vode",""],
+ ["Drinking-water quality, motorboats banned, and the western half has no access road.","Put in at Techendorf, 8–10 km west. A full-day mission with lunch on the bank.","Camping Knaller and Camping Müller, both on the water",""]],
+["Soča — Čezsoča → Srpenica 1",2,"SI","rieka",5,8,15,3,2,0,"K1",
+ ["Ikonická tyrkysová voda medzi vápencovými blokmi. Vzdutie pod Mostom na Soči je jazerné — pokojné, s kaňonovými stenami.","Overené úseky: <b>Čezsoča → Srpenica 1</b> (WW I–II) — vo dvojici v pohode, toto je etalón. <b>Srpenica 1 → Srpenica 2</b> — len sólo, tu začína raftový úsek. <b>Srpenica 2 → Trnovo 1</b> — len raftom, na paddleboard nie. Celé Srpenica 1 → Trnovo 1 je WW II–III, pri vysokom stave IV. Na freedive je najlepšie vzdutie pod Mostom na Soči — tyrkys bez prúdu.","Camp Vodenca (Bovec), Camp Lazar (Kobarid)","Povinná SUP permitka a sezónne obmedzenia úsekov. Over pred cestou."],
+ ["Iconic turquoise water between limestone blocks. The backwater below Most na Soči is lake-like — calm, with canyon walls.","Sections we've run: <b>Čezsoča → Srpenica 1</b> (WW I–II) — comfortable as a pair, this is the benchmark. <b>Srpenica 1 → Srpenica 2</b> — solo only; the rafting stretch starts here. <b>Srpenica 2 → Trnovo 1</b> — raft only, not for a board. The whole Srpenica 1 → Trnovo 1 is WW II–III, IV at high water. For freediving the Most na Soči backwater is best — turquoise without current.","Camp Vodenca (Bovec), Camp Lazar (Kobarid)","A SUP permit is mandatory and sections close seasonally. Check before you go."]],
+["Lago del Predil",2,"IT","jazero",5.25,8,12,3,0,0,"A",
+ ["Julské Alpy z talianskej strany, opustené bane, kulisa Mangartu. Všetci idú do Slovinska.","Nástup od severného parkoviska, okruh 4 km. Strmé svahy hneď za plytčinou.","Kempy až v Tarvisiu — pri jazere sa dá prespať v aute",""],
+ ["The Julian Alps from the Italian side, abandoned mines, the Mangart backdrop. Everyone else goes to Slovenia.","Put in at the north car park, 4 km loop. Steep slopes just past the shallows.","Campsites in Tarvisio — sleeping in the car by the lake works",""]],
+["Strunjan",2,"SI","more",5.5,5,10,2,0,0,"K2",
+ ["Najvyšší flyšový útes Jadranu, soľné panvy Sečovlje.","Nástup Strunjan, popod útes k Mesečevmu zálivu. Krátko, ale efektne.","Camping Strunjan, Camping Lucija (Portorož)",""],
+ ["The highest flysch cliff on the Adriatic, the Sečovlje salt pans.","Put in at Strunjan, under the cliff to Moon Bay. Short but striking.","Camping Strunjan, Camping Lucija (Portorož)",""]],
+["Lago di Cavazzo",2,"IT","jazero",5.5,4,8,2,0,0,"K2",
+ ["Karnské Alpy nad hladinou, tichý východný breh. Málo známe.","Nástup Somplago, okruh ~8 km. Motorové lode zakázané.","Camping Al Lago (Bordano) — jednoduchý a lacný",""],
+ ["The Carnic Alps above the water, a quiet east shore. Little known.","Put in at Somplago, ~8 km loop. Motorboats banned.","Camping Al Lago (Bordano) — simple and cheap",""]],
+["Mrežnica",2,"HR","rieka",5.5,6,12,2,0,0,"K2",
+ ["Desiatky travertínových kaskád a hlbokých krasových bazénov pod nimi.","Pereje WW1–2, veľa prenášania paddleboardu. Krok nahor od Soče bez toho, aby to bolo nebezpečné.","Camp Slapić priamo pri rieke",""],
+ ["Dozens of travertine cascades with deep karst pools below them.","WW1–2 rapids, plenty of portaging. A step up from the Soča without being dangerous.","Camp Slapić right on the river",""]],
+["Achensee",3,"AT","jazero",5.5,8,12,3,0,0,"K2",
+ ["9 km dlhý fjord medzi Karwendelom a Rofanom. Severný koniec je divoký.","Nástup Achenkirch, na juh popri západnom brehu pod steny. Popoludní fúka — choď ráno.","Camping Schwarzenau (Achenkirch), Camping Karwendel",""],
+ ["A 9 km fjord between the Karwendel and Rofan. The north end is wild.","Put in at Achenkirch, south along the west shore under the walls. It blows in the afternoon — go early.","Camping Schwarzenau (Achenkirch), Camping Karwendel",""]],
+["Eibsee",3,"DE","jazero",5.75,8,15,3,1,0,"K1",
+ ["Zugspitze kolmo nad jazerom, osem ostrovčekov, biele štrkové dno.","Okruh cez ostrovčeky ~7 km. O 10:00 je tam dav — choď skoro ráno.","Camping Zugspitze (Grainau), Camping Isarhorn","Parkovisko je platené a drahé, ~10 €/deň — prespanie v aute tam nečakaj."],
+ ["The Zugspitze straight above the lake, eight islets, white gravel bottom.","~7 km loop through the islets. Crowded by 10:00 — go at dawn.","Camping Zugspitze (Grainau), Camping Isarhorn","Parking is paid and pricey, ~€10/day — don't expect to sleep in the car there."]],
+["Lago di Barcis",3,"IT","jazero",6,6,10,2,0,0,"K1",
+ ["Valcellina — kaňon nad jazerom. Talianska farba vody bez talianskych davov.","Nástup od promenády v Barcis, do západného ramena pod kaňon. Okruh ~6 km.","Camping Valcellina (Claut), agrikempy okolo Barcis",""],
+ ["Valcellina — a canyon above the lake. Italian water colour without the Italian crowds.","Put in at the Barcis promenade, into the west arm below the canyon. ~6 km loop.","Camping Valcellina (Claut), farm campsites around Barcis",""]],
+["Gacka",3,"HR","rieka",6,10,20,2,1,0,"K1",
+ ["Ponorná krasová rieka, veľmi nízky obsah sedimentov — pstruhy vidno z paddleboardu.","Pokojný meandrujúci tok. Úzka — na tandem maximálne dvaja.","Kamp Velebit","Z veľkej časti obhospodarovaná ako rybársky revír — plavba môže byť obmedzená alebo spoplatnená."],
+ ["A sinking karst river with very little sediment — you can see trout from the board.","A calm meandering flow. Narrow — two people max on a tandem.","Kamp Velebit","Largely managed as a fly-fishing beat — paddling may be restricted or charged."]],
+["Walchensee",3,"DE","jazero",6,10,15,3,1,0,"K2",
+ ["Bavorské Karibiky — tyrkysová farba, Herzogstand nad tým. Známy nemecký freedive spot.","Nástup Sachenbach alebo Einsiedl k polostrovu Zwergern. Na vode buď do 12:00.","Camping Walchensee (Einsiedl), Camping am Kesselberg","Popoludní silný termický vietor — preto je to windsurf mekka."],
+ ["The Bavarian Caribbean — turquoise water, the Herzogstand above. A known German freedive spot.","Put in at Sachenbach or Einsiedl toward the Zwergern peninsula. Be off the water by noon.","Camping Walchensee (Einsiedl), Camping am Kesselberg","Strong thermal wind in the afternoon — that's why it's a windsurf mecca."]],
+["Solina",3,"PL","jazero",6,3,5,1,0,0,"K2",
+ ["Bieszczady — najprázdnejšie hory strednej Európy. Rozvetvené ramená, medvede.","Nástup Polańczyk do severných ramien. Veľké jazero — dá sa robiť viacdňová misia.","Kempy okolo Polańczyk a Solina",""],
+ ["The Bieszczady — the emptiest mountains in Central Europe. Branching arms, bears.","Put in at Polańczyk into the northern arms. Big enough for a multi-day mission.","Campsites around Polańczyk and Solina",""]],
+["Plansee + Heiterwanger See",3,"AT","jazero",6.25,10,20,3,1,1,"K2",
+ ["Dve jazerá spojené 300 m kanálom, hĺbka 78 m, na dne potopené člny a koče.","Prepádlovať kanálom z jedného do druhého — 18 km trasa, presne to, kvôli čomu má SUP zmysel.","Camping Seespitze priamo na brehu, ďalej Sennalpe a Fischer am See","Divoké stanovanie kontroluje horská stráž, pokuta 220 € — v aute tu neprespíš."],
+ ["Two lakes joined by a 300 m channel, 78 m deep, sunken boats and carriages on the bottom.","Paddle the channel from one into the other — an 18 km route, exactly what a board is for.","Camping Seespitze on the shore, plus Sennalpe and Fischer am See","Mountain rangers police wild camping, €220 fine — sleeping in the car is out here."]],
+["Fernsteinsee",3,"AT","jazero",6.5,15,25,3,2,0,"K1",
+ ["Neuveriteľná tyrkysovo-modrá, potopený les a kamenné útvary. Legendárny freedive spot.","Ak vyjdú pravidlá, je to najlepšia sladká voda v zozname. Studená — treba 7 mm.","Kempy v Nassereith, Camping Rossbach","V súkromnej správe hotela Schloss Fernsteinsee — vstup za poplatok, môže byť len pre potápačov."],
+ ["Improbable turquoise-blue, a sunken forest and rock formations. A legendary freedive spot.","If the rules work out, it's the best fresh water on this list. Cold — you'll want 7 mm.","Campsites in Nassereith, Camping Rossbach","Privately managed by Hotel Schloss Fernsteinsee — paid entry, possibly divers only."]],
+["Blindsee",3,"AT","jazero",6.5,12,20,3,2,0,"K1",
+ ["Potopený les — kmene stojace pod hladinou, vidno ich priamo z paddleboardu.","Pádluj nad potopenými stromami, freedive po kmeňoch nadol.","Kemp Biberwier, Camping Ehrwald","Súkromný pozemok, vstup za poplatok — over. Plansee + Blindsee + Fernsteinsee sú do 25 km od seba."],
+ ["A sunken forest — trunks standing below the surface, visible straight from the board.","Paddle over the drowned trees and freedive down along the trunks.","Biberwier campsite, Camping Ehrwald","Private land, paid entry — check. Plansee, Blindsee and Fernsteinsee are within 25 km of each other."]],
+["Lago di Ledro",3,"IT","jazero",6.5,8,12,3,0,0,"K2",
+ ["Pokojnejší brat Gardy, 600 m n. m., kolové obydlia UNESCO na brehu.","Nástup Pieve di Ledro, okruh ~10 km. Motorové lode zakázané.","Camping Al Sole, Camping Azzurro (Pieve di Ledro)",""],
+ ["Garda's quieter sibling at 600 m, with UNESCO pile dwellings on the shore.","Put in at Pieve di Ledro, ~10 km loop. Motorboats banned.","Camping Al Sole, Camping Azzurro (Pieve di Ledro)",""]],
+["Stara Baška — Krk",3,"HR","more",6.5,15,25,3,0,1,"K2",
+ ["Holé mesačné svahy, výhľad na Prvić a Goli otok. Zátoky bez prístupu z cesty.","Na juh k Oprni — dostupné len z vody alebo pešo. Stena do 20 m hneď pri brehu.","Camping Škrila (Stara Baška) priamo nad zátokami",""],
+ ["Bare lunar slopes, views to Prvić and Goli otok. Coves with no road access.","South toward Oprna — reachable only from the water or on foot. A 20 m wall right off the shore.","Camping Škrila (Stara Baška) directly above the coves",""]],
+["Vrsar — súostrovie",3,"HR","more",6.5,10,20,3,0,0,"K2",
+ ["Osemnásť ostrovčekov roztrúsených pár kilometrov od brehu. Západná Istria bez rovinjských davov.","Nástup Vrsar alebo Koversada, preskakovať medzi ostrovčekmi — Sveti Juraj, Galopun, Lakal. Otvorené more, choď za pokojného rána.","Camping Valkanela, Camping Porto Sole — priamo pri mori",""],
+ ["Eighteen islets scattered a few kilometres offshore. West Istria without the Rovinj crowds.","Put in at Vrsar or Koversada and hop between the islets — Sveti Juraj, Galopun, Lakal. Open sea, go on a calm morning.","Camping Valkanela, Camping Porto Sole — right on the sea",""]],
+["Limski kanal",3,"HR","more",6.5,5,10,2,1,0,"K1",
+ ["Desaťkilometrový zatopený kaňon so stometrovými stenami — jediný skutočný fjordový záliv Jadranu.","Nástup pri ústí od Vrsaru, pádlovať dovnútra medzi steny. Voda je brakická a kalnejšia než otvorené more — je to o scenérii, nie o freedive.","Kempy pri Vrsare, ~5 km","Chránený morský rezervát s farmami na mušle a ustrice — kúpanie je v častiach zakázané a plavba regulovaná. Drž sa mimo bójkovaných chovných polí."],
+ ["A ten-kilometre drowned canyon with hundred-metre walls — the Adriatic's only true fjord-like inlet.","Put in near the mouth at Vrsar and paddle inward between the walls. The water is brackish and murkier than the open sea — this is about scenery, not freediving.","Campsites near Vrsar, ~5 km","A protected marine reserve with mussel and oyster farms — swimming is banned in places and boating regulated. Stay clear of the buoyed farming beds."]],
+["Kamenjak — Premantura",3,"HR","more",6.5,15,25,3,1,0,"K2",
+ ["Divoký park na južnom cípe Istrie — útesy, oblúky, jaskyňa Kolombarica.","Nástup z pláže Debeljak okolo cípu k jaskyni.","Camping Kažela, Camping Runke — cenovo znesiteľné","Prúd a vietor v úžine k ostrovu Porer — nechoď ďaleko od brehu."],
+ ["A wild park on Istria's southern tip — cliffs, arches, the Kolombarica cave.","Put in at Debeljak beach and round the cape to the cave.","Camping Kažela, Camping Runke — bearable on price","Current and wind in the channel toward Porer island — don't go far from shore."]],
+["Lago di Tenno",3,"IT","jazero",6.75,8,12,3,1,0,"K1",
+ ["Farba, ktorá vyzerá vyfotošopovaná. Ostrovček spojený s brehom pešou kosou.","Okruh 2 km, freedive okolo ostrovčeka.","Kempy v Riva del Garda, ~10 km","Malé chránené jazero — pravidlá plavby sa menia, over."],
+ ["A colour that looks retouched. A small island joined to the bank by a walkable spit.","2 km loop, freediving around the islet.","Campsites in Riva del Garda, ~10 km","A small protected lake — boating rules change, check."]],
+["Lago di Garda — sever",3,"IT","jazero",6.75,6,12,2,2,0,"K2",
+ ["Kolmé steny Monte Brione a Cima Capi padajúce do vody. Fjordový charakter severu.","Nástup Torbole na západ pod steny k Ponale.","Camping Maroadi (Torbole), Camping Al Lago — 25–35 €/noc za dvoch","Vietor Ora fúka od poludnia 4–6 Bft. Na vode len 6:00–11:00, popoludní je to pre SUP nebezpečné."],
+ ["The vertical faces of Monte Brione and Cima Capi dropping into the water. The north end is fjord-like.","Put in at Torbole, west under the walls toward Ponale.","Camping Maroadi (Torbole), Camping Al Lago — €25–35/night for two","The Ora wind blows 4–6 Bft from midday. On the water 06:00–11:00 only; afternoons are dangerous for SUP."]],
+["Cres — Sv. Ivan",3,"HR","more",7,20,30,3,1,1,"K2",
+ ["Najčistejšie more severného Jadranu. Pláž pod Lubenicami dostupná len pešo alebo z vody.","<b>Tu ste už boli — zostup pešo z Lubeníc bol masaker.</b> Presne preto sem patrí paddleboard: nástup Valun alebo Martinšćica, 5–8 km popri pobreží, žiadne šľapanie po sute. Steny do 30 m hneď za brehom.","Camping Slatina (Martinšćica), Camping Kovačine (Cres)","Trajekt Brestova–Porozina. Ráta sa s minimálne štyrmi dňami."],
+ ["The clearest sea in the northern Adriatic. The beach below Lubenice is reachable only on foot or from the water.","<b>You've been here — the walk down from Lubenice was brutal.</b> That's exactly why a board belongs here: put in at Valun or Martinšćica, 5–8 km along the coast, no scree descent. Walls to 30 m just off the shore.","Camping Slatina (Martinšćica), Camping Kovačine (Cres)","Ferry Brestova–Porozina. Budget four days minimum."]],
+["Lago di Molveno",3,"IT","jazero",7,8,12,3,0,0,"K2",
+ ["Brenta Dolomity kolmo nad hladinou. Pravdepodobne najkrajšia kulisa zoznamu.","Od severnej pláže na juh k divokému koncu. Ráno sa Brenta odráža v hladine.","Camping Spiaggia Lago di Molveno priamo pri vode",""],
+ ["The Brenta Dolomites straight above the water. Probably the finest backdrop on this list.","From the north beach south to the wild end. At dawn the Brenta reflects in the surface.","Camping Spiaggia Lago di Molveno right on the water",""]],
+["Bodensee",3,"AT","jazero",8,4,8,1,0,0,"K1",
+ ["Pádlovanie cez tri krajiny, ostrov Mainau, kláštor Reichenau.","Veľká voda s hustou lodnou dopravou. Na freedive slabé.","Kempy pri Bregenzi",""],
+ ["Paddling across three countries, Mainau island, Reichenau abbey.","Big water with heavy boat traffic. Weak for freediving.","Campsites near Bregenz",""]],
+["Zrmanja",3,"HR","rieka",8,5,10,2,1,0,"K1",
+ ["200 m vysoké steny kaňonu, travertínové kaskády. Natáčal sa tu Winnetou.","Po prúde. Úsek Muškovci → Obrovac je pokojnejší a na vašu úroveň akurát.","Camp Zrmanja (Kaštel Žegarski), kempy v Obrovci","8 h je na hranici — má zmysel len ako 4-dňovka, ideálne spojená s Krkom cestou späť."],
+ ["200 m canyon walls, travertine cascades. Winnetou was filmed here.","Downstream. The Muškovci → Obrovac section is calmer and right at your level.","Camp Zrmanja (Kaštel Žegarski), campsites in Obrovac","8 h is the limit — only worth it as a four-day trip, ideally paired with Krk on the way back."]]
+];
+
+const TOLLS=[
+ ["SK10",10.80,"SK známka 10-dňová","SK vignette, 10-day",
+  "Platí 10 dní, netreba ju kupovať na každý výlet.","Valid 10 days — not a per-trip purchase."],
+ ["AT10",12.80,"AT známka 10-dňová","AT vignette, 10-day",
+  "Na pumpe ju dostaneš platnú okamžite. Online 2-mesačná a ročná majú 18-dňový odklad.",
+  "Bought at a petrol station it's valid immediately. Online 2-month and annual ones have an 18-day delay."],
+ ["HU10",13.00,"HU e-matrica 10-dňová","HU e-matrica, 10-day",
+  "Kupuje sa online alebo na pumpe pri hranici.","Buy online or at a petrol station near the border."],
+ ["SI7",16.00,"SI vinjeta 7-dňová","SI vignette, 7-day",
+  "Najkratšia dostupná — aj na jeden víkend.","The shortest option available, even for one weekend."],
+ ["KARA",18.00,"Karawanken tunel","Karawanken tunnel",
+  "9 € za smer. Obídeš cez Wurzenpass zadarmo — strmý, ale Yaris to dá.",
+  "€9 each way. Bypass it free over the Wurzenpass — steep, but a Yaris manages."],
+ ["BREN",25.00,"Brenner A13","Brenner A13",
+  "12,50 € za smer, prechod alpským hrebeňom na juh.","€12.50 each way, crossing the Alpine ridge southbound."],
+ ["ARLB",26.00,"Arlberg S16","Arlberg S16",
+  "13 € za smer, jediná rozumná cesta na západ.","€13 each way, the only sensible route west."],
+ ["ITA",16.00,"IT diaľnice — Tarvisio","IT motorways — Tarvisio",
+  "Úsekové mýto, odhad podľa vzdialenosti.","Distance-based toll, estimated."],
+ ["ITA2",30.00,"IT diaľnice — Trentino","IT motorways — Trentino",
+  "Úsekové mýto, odhad podľa vzdialenosti.","Distance-based toll, estimated."],
+ ["HRM",30.00,"HR mýto — Istria a Kvarner","HR toll — Istria and Kvarner",
+  "Chorvátsko nemá známku, platí sa za prejdený úsek.","Croatia has no vignette; you pay per section driven."],
+ ["HRM2",40.00,"HR mýto — Dalmácia","HR toll — Dalmatia",
+  "Chorvátsko nemá známku, platí sa za prejdený úsek.","Croatia has no vignette; you pay per section driven."],
+ ["CH40",42.00,"CH známka ročná","CH vignette, annual",
+  "Existuje len ročná, 40 CHF — krátkodobá neexistuje. Pri jednom výjazde je to celá suma.",
+  "Annual only, CHF 40 — there is no short-term option. For a single trip you pay the whole thing."]
+];
+const T=Object.fromEntries(TOLLS.map(t=>[t[0],t]));
+const BYLAND={SK:["SK10"],HU:["HU10"],AT:["AT10"],DE:["AT10"],PL:["SK10"],CH:["AT10","CH40"],
+  SI:["AT10","SI7","KARA"],IT:["AT10","ITA"],HR:["HU10","HRM"]};
+const OVERRIDE={"Strunjan":["AT10","SI7"],"Bodensee":["AT10","ARLB"],
+  "Lago di Garda — sever":["AT10","BREN","ITA2"],"Lago di Ledro":["AT10","BREN","ITA2"],
+  "Lago di Tenno":["AT10","BREN","ITA2"],"Lago di Molveno":["AT10","BREN","ITA2"],
+  "Zrmanja":["HU10","HRM2"]};
+
+const BANS=[
+ ["Königssee a Obersee, DE","Königssee and Obersee, DE",
+  "Národný park — súkromné plavidlá vrátane SUP zakázané na oboch jazerách. Na Obersee sa navyše dostaneš len loďou NP.",
+  "National park — private craft including SUP banned on both lakes. Obersee is only reachable by the park boat anyway."],
+ ["Grüner See, AT","Grüner See, AT",
+  "Od 2016 zákaz vstupu do vody, plávanie aj potápanie. Len obhliadka z brehu.",
+  "Since 2016 entering the water is banned, swimming and diving alike. Look from the bank only."],
+ ["Lago di Braies, IT","Lago di Braies, IT",
+  "Vlastné plavidlá zakázané — len požičané drevené člny. Plus rezervácia vjazdu.",
+  "Own craft banned — only rented wooden rowboats. Plus a booked entry slot."],
+ ["Lago di Carezza, IT","Lago di Carezza, IT",
+  "Zákaz vstupu do vody. Len fotenie z chodníka.","No entry into the water. Photos from the path only."],
+ ["Laghi di Fusine, IT","Laghi di Fusine, IT",
+  "Prírodná rezervácia — zákaz vstupu do vody, hoci lokalita vyzerá ideálne.",
+  "Nature reserve — no entry into the water, however ideal it looks."],
+ ["Plitvice a Krka, HR","Plitvice and Krka, HR",
+  "Plavba aj kúpanie zakázané v celom národnom parku.","Boating and swimming banned throughout the national park."],
+ ["Tatranské plesá, SK a PL","Tatra lakes, SK and PL",
+  "TANAP a TPN — zákaz akejkoľvek plavby aj kúpania.","TANAP and TPN — all boating and swimming prohibited."],
+ ["Vransko jezero, Cres, HR","Vransko jezero, Cres, HR",
+  "Zdroj pitnej vody, prísny zákaz vstupu.","A drinking-water source, strictly off limits."]
+];
+
+const I18N={
+ sk:{lang:"EN",dark:"Tmavý režim",light:"Svetlý režim",
+  h1:'Kam s paddleboardom <em>a na freedive</em>',
+  sub:"56 vôd do 9 hodín jazdy z Bratislavy, zoradených podľa toho, čo je pod hladinou vidieť. Ultra-low-budget: stan, vlastná strava, Yaris.",
+  chartTitle:"Hĺbkomer: čas jazdy vs. viditeľnosť",chartHint:"Klikni na bod → skočí na kartu",
+  mapTitle:"Mapa: kde to celé leží",mapHint:"Krúžky = dojazd z Bratislavy",
+  segChart:"Hĺbkomer",segMap:"Mapa",gmap:"↗ Moja Google mapa",
+  legend:["jazero","more","rieka","Čím nižšie bod, tým čistejšia voda.","Krúžky = 2,5 / 5 / 9 hodín jazdy z Bratislavy."],
+  lC:"Krajiny",lW:"Typ vody",lD:"Trvanie",lS:"Zoradiť",lF:"Len vhodné na freedive (od ~5 m)",
+  lLkm:"Spotreba l/100 km",lEur:"Cena paliva €/l",lQ:"Hľadať",lV:"Diaľničné známky, ktoré už mám",
+  lMaxH:"Najviac hodín jazdy",lMinV:"Najmenej viditeľnosti",lMaxC:"Najviac za výjazd",
+  reset:"Zrušiť filtre",
+  fH:h=>h>=9?"bez limitu":`do ${String(h).replace(".",",")} h`,
+  fV:v=>v===0?"všetko":`od ${v} m`,
+  fCst:c=>c>=300?"bez limitu":`do ${c} €`,
+  cname:{AT:"Rakúsko",SK:"Slovensko",SI:"Slovinsko",IT:"Taliansko",
+    HR:"Chorvátsko",DE:"Nemecko",PL:"Poľsko",HU:"Maďarsko",CH:"Švajčiarsko"},
+  tipF:"Nechá len vody, kde má freedive zmysel — zhruba od 5 m viditeľnosti. Vypadne 14 lokalít: kalné rieky, Neusiedler See a plytké štrkoviská.",
+  qph:"Krk, Soča, kemp…",all:"Všetky",
+  water:{jazero:"Jazero",more:"More",rieka:"Rieka"},
+  dur:{1:"Jednodňovka — do 2,5 h",2:"Víkend — 3 až 5 h",3:"Predĺžený — 6 až 9 h"},
+  durShort:{1:"Jednodňovka",2:"Víkend",3:"Predĺžený"},
+  wShort:{jazero:"jazero",more:"more",rieka:"rieka"},
+  sort:{rating:"Podľa hodnotenia",vis:"Podľa viditeľnosti",time:"Podľa času jazdy",cost:"Podľa ceny výjazdu"},
+  sleep:{K2:"Kemp pri vode",K1:"Kemp v okolí",A:"Auto na parkovisku",X:"Nič v okolí"},
+  kRate:"Hodnotenie",kVis:"Vidieť",kSup:"Na vodu",kSleep:"Spanie",kToll:"Mýto",
+  top:"Top 5",check:"Over pravidlá",heads:"Pozor",noToll:"Nič navyše — známky už máš",
+  picked:"Vybraté z grafu",
+  roundtrip:"Tam a späť",breakdown:(f,t)=>`· palivo ${f} + mýto ${t}`,map:"Mapa",
+  empty:"Nič nesedí — uvoľni filtre.",
+  count:(n,c)=>`<b>${n}</b> ${n===1?"lokalita":n<5?"lokality":"lokalít"} · najlacnejší výjazd <b class="mono">${c} €</b> vrátane mýta`,
+  tollTitle:"Z čoho sa mýto počíta",
+  tollLead:"Spiatočné sumy pre auto do 3,5 t, ceny 2026. Chorvátsko nemá známku — platí sa za prejdený úsek, preto je pri Krku a Kamenjaku mýto najväčšou položkou cesty hneď po palive.",
+  thT:["Poplatok","Tam a späť","Poznámka"],
+  banTitle:"Kam nechodiť s paddleboardom",
+  banLead:"Osem miest, kde je vstup na vodu alebo do vody zakázaný. Stoja tu preto, že sú to presne tie lokality, ktoré vyskočia pri hľadaní „najkrajšie jazero“ — a človek tam odjazdí osem hodín zbytočne.",
+  thB:["Lokalita","Čo tam platí"],
+  foot:`<p><b>Spanie.</b> <em>Kemp pri vode</em> = oficiálny kemp priamo na brehu. <em>Kemp v okolí</em> = do zhruba 10 km, treba prejsť. <em>Auto na parkovisku</em> = kemp je ďaleko alebo žiadny, prespanie v aute býva tolerované mimo hlavnej sezóny. <em>Nič v okolí</em> = plánuj to ako jednodňovku. <b>Divoké stanovanie je v AT, IT, SI aj HR zakázané a pokutované</b>, v chránených územiach obzvlášť.</p>
+<p><b>Hodnotenie</b> je vypočítané, nie vycucané z prsta: viditeľnosť pod vodou (55 bodov), vhodnosť na freedive (25), bonus za TOP 5 (12) a zrážka za obmedzenia — 16 bodov, ak treba overiť pravidlá, 5 pri menšom háčiku. <b>Meria kvalitu vody, nie kvalitu výletu.</b> Preto majú dunajské zjazdy nízke číslo — pádluje sa tam výborne, len pod hladinou nie je nič vidieť.</p>
+<p><b>Čísla sú odhady, nie merania.</b> Časy jazdy sú bez zápch, viditeľnosti sú typické letné hodnoty, mýta sú orientačné podľa najbežnejšej trasy. Pravidlá pre SUP sa v AT, IT, SI a HR menia každú sezónu — čokoľvek s oranžovou alebo červenou značkou si over pred cestou.</p>
+<p>Funguje offline — žiadne externé skripty ani fonty. Palivo je spiatočné, počítané ako čas × 75 km/h.</p>
+<p>Obrysy štátov a jazier: <b>Natural Earth</b> (public domain), zjednodušené a vložené priamo v súbore. Mapa slúži na orientáciu, nie na navigáciu — na tú je pri každej lokalite odkaz do Google Maps.</p>`},
+ en:{lang:"SK",dark:"Dark mode",light:"Light mode",
+  h1:'Paddleboard and freedive <em>from Bratislava</em>',
+  sub:"56 waters within 9 hours' drive of Bratislava, ranked by what you can actually see underwater. Ultra-low-budget: tent, own food, a Yaris.",
+  chartTitle:"Depth sounding: drive time vs. visibility",chartHint:"Click a dot → jumps to its card",
+  mapTitle:"Map: where it all sits",mapHint:"Rings = drive time from Bratislava",
+  segChart:"Sounding",segMap:"Map",gmap:"↗ My Google map",
+  legend:["lake","sea","river","The lower the dot, the clearer the water.","Rings = 2.5 / 5 / 9 hours' drive from Bratislava."],
+  lC:"Countries",lW:"Water type",lD:"Trip length",lS:"Sort by",lF:"Freedive-worthy only (5 m+)",
+  lLkm:"Fuel l/100 km",lEur:"Fuel price €/l",lQ:"Search",lV:"Vignettes I already have",
+  lMaxH:"Drive time at most",lMinV:"Visibility at least",lMaxC:"Trip cost at most",
+  reset:"Clear filters",
+  fH:h=>h>=9?"no limit":`under ${h} h`,
+  fV:v=>v===0?"any":`${v} m and up`,
+  fCst:c=>c>=300?"no limit":`under €${c}`,
+  cname:{AT:"Austria",SK:"Slovakia",SI:"Slovenia",IT:"Italy",
+    HR:"Croatia",DE:"Germany",PL:"Poland",HU:"Hungary",CH:"Switzerland"},
+  tipF:"Keeps only water where freediving makes sense — roughly 5 m visibility and up. Drops 14 spots: murky rivers, Neusiedler See and shallow gravel pits.",
+  qph:"Krk, Soča, camp…",all:"All",
+  water:{jazero:"Lake",more:"Sea",rieka:"River"},
+  dur:{1:"Day trip — under 2.5 h",2:"Weekend — 3 to 5 h",3:"Long weekend — 6 to 9 h"},
+  durShort:{1:"Day trip",2:"Weekend",3:"Long weekend"},
+  wShort:{jazero:"lake",more:"sea",rieka:"river"},
+  sort:{rating:"Rating",vis:"Visibility",time:"Drive time",cost:"Trip cost"},
+  sleep:{K2:"Camp on the water",K1:"Camp nearby",A:"Car at the lot",X:"Nothing nearby"},
+  kRate:"Rating",kVis:"See",kSup:"Put-in",kSleep:"Sleep",kToll:"Tolls",
+  top:"Top 5",check:"Check rules",heads:"Heads-up",noToll:"Nothing extra — you have the vignettes",
+  picked:"Picked from the chart",
+  roundtrip:"Round trip",breakdown:(f,t)=>`· fuel ${f} + tolls ${t}`,map:"Map",
+  empty:"Nothing matches — loosen the filters.",
+  count:(n,c)=>`<b>${n}</b> ${n===1?"spot":"spots"} · cheapest trip <b class="mono">€${c}</b> including tolls`,
+  tollTitle:"What the tolls are made of",
+  tollLead:"Round-trip figures for a car under 3.5 t, 2026 prices. Croatia has no vignette — you pay per section driven, which makes tolls the biggest cost after fuel for Krk and Kamenjak.",
+  thT:["Charge","Round trip","Note"],
+  banTitle:"Where not to take the board",
+  banLead:"Eight places where going on or into the water is banned. They're listed because they're exactly what comes up when you search for “most beautiful lake” — and you'd drive eight hours for nothing.",
+  thB:["Place","What applies"],
+  foot:`<p><b>Sleeping.</b> <em>Camp on the water</em> = an official campsite right on the shore. <em>Camp nearby</em> = within roughly 10 km. <em>Car at the lot</em> = the campsite is far or absent; sleeping in the car is usually tolerated outside high season. <em>Nothing nearby</em> = plan it as a day trip. <b>Wild camping is banned and fined in AT, IT, SI and HR</b>, especially in protected areas.</p>
+<p><b>The rating is computed</b>, not invented: underwater visibility (55 points), freedive suitability (25), a TOP 5 bonus (12), minus a penalty for restrictions — 16 points where rules need checking, 5 for a minor caveat. <b>It scores the water, not the trip.</b> That is why the Danube runs rank low — the paddling is great, there is just nothing to see below the surface.</p>
+<p><b>These are estimates, not measurements.</b> Drive times assume no traffic, visibility figures are typical summer values, tolls are indicative for the most common route. SUP rules in AT, IT, SI and HR change every season — verify anything with an orange or red marker before you go.</p>
+<p>Works offline — no external scripts or fonts. Fuel is round trip, calculated as time × 75 km/h.</p>
+<p>Country and lake outlines: <b>Natural Earth</b> (public domain), simplified and embedded in the file. The map is for orientation, not navigation — each spot links out to Google Maps for that.</p>`}
+};
+
+let L="sk";
+const $=i=>document.getElementById(i);
+const t=()=>I18N[L];
+const txt=x=>L==="sk"?x[11]:x[12];
+
+const mix=(a,b,p)=>a.map((v,i)=>Math.round(v+(b[i]-v)*p));
+const visColor=v=>`rgb(${mix([154,139,98],[29,127,184],Math.min(v/22,1)).join(",")})`;
+const wColor=w=>w==="more"?"var(--w-sea)":w==="rieka"?"var(--w-river)":"var(--w-lake)";
+let SEL=null;
+const fuel=h=>h*75*2/100*(+$("lkm").value||5.5)*(+$("eur").value||1.55);
+/* Približné súradnice lokalít [lat, lon] — na schematickú mapu, nie na navigáciu. */
+const CO={
+"Dunaj — Hainburg → Devín":[48.15,16.95],"Dunaj — Štúrovo → Szob":[47.80,18.72],
+"Neusiedler See":[47.85,16.84],"Lupa-tó":[47.62,19.06],"Stausee Ottenstein":[48.61,15.36],
+"Lunzer See":[47.85,15.03],"Erlaufsee":[47.80,15.28],"Leopoldsteinersee":[47.55,14.90],
+"Liptovská Mara":[49.10,19.50],"Tisza-tó":[47.65,20.67],"Almsee":[47.75,13.95],
+"Attersee":[47.83,13.55],"Traunsee":[47.87,13.80],"Mondsee":[47.83,13.38],
+"Fuschlsee":[47.80,13.28],"Wolfgangsee":[47.74,13.42],"Hallstätter See":[47.60,13.66],
+"Gosausee":[47.53,13.50],"Palcmanská Maša — Dedinky":[48.85,20.38],
+"Jezioro Czorsztyńskie":[49.44,20.30],"Wörthersee":[46.62,14.15],"Bledské jazero":[46.36,14.09],
+"Millstätter See":[46.79,13.58],"Faaker See":[46.56,13.92],"Pressegger See":[46.62,13.38],
+"Zakrzówek — Krakov":[50.04,19.91],"Bohinjské jazero":[46.28,13.87],"Weissensee":[46.71,13.29],
+"Soča — Čezsoča → Srpenica 1":[46.31,13.57],"Lago del Predil":[46.42,13.57],
+"Strunjan":[45.53,13.60],"Lago di Cavazzo":[46.29,13.08],"Mrežnica":[45.42,15.47],
+"Achensee":[47.47,11.72],"Eibsee":[47.46,11.01],"Lago di Barcis":[46.19,12.56],
+"Gacka":[44.88,15.32],"Walchensee":[47.58,11.33],"Solina":[49.38,22.45],
+"Plansee + Heiterwanger See":[47.48,10.83],"Fernsteinsee":[47.35,10.83],"Blindsee":[47.39,10.90],
+"Lago di Ledro":[45.88,10.75],"Stara Baška — Krk":[44.95,14.72],"Vrsar — súostrovie":[45.15,13.58],
+"Limski kanal":[45.13,13.72],"Kamenjak — Premantura":[44.77,13.91],"Lago di Tenno":[45.92,10.83],
+"Lago di Garda — sever":[45.87,10.87],"Cres — Sv. Ivan":[44.83,14.35],
+"Lago di Molveno":[46.14,10.96],"Bodensee":[47.50,9.75],"Zrmanja":[44.20,15.70],
+"Walensee":[47.12,9.22],"Urnersee — Vierwaldstättersee":[46.90,8.62],"Caumasee — Flims":[46.83,9.28]};
+const HOME=[48.15,17.11];
+/* Reálne obrysy štátov a jazier (Natural Earth, public domain), zjednodušené
+   a orezané na región. Vložené priamo v súbore — žiadne externé načítanie. */
+const LAND=[[[38.214,47.091],[37.543,47.075],[37.34,46.917],[37.048,46.876],[36.795,46.714],[36.559,46.763],[36.279,46.659],[35.827,46.624],[35.4,46.381],[35.204,46.169],[35.015,46.106],[35.28,46.279],[35.292,46.371],[35.23,46.441],[35.064,46.267],[34.85,46.19],[34.857,45.987],[35.002,45.733],[34.946,45.729],[34.8,45.791],[34.794,45.892],[34.687,45.977],[34.45,45.966],[34.354,46.062],[34.027,46.107],[33.807,46.208],[33.66,46.22],[33.594,46.096],[33.43,46.058],[33.202,46.176],[32.477,46.084],[32.036,46.261],[31.831,46.282],[31.78,46.325],[31.992,46.364],[32.008,46.43],[31.714,46.472],[31.555,46.554],[32.361,46.475],[32.578,46.616],[32.354,46.565],[32.044,46.642],[31.945,46.784],[31.94,46.982],[31.759,47.213],[31.913,46.926],[31.873,46.65],[31.532,46.665],[31.563,46.777],[31.403,46.629],[30.796,46.552],[30.657,46.267],[30.219,45.867],[29.821,45.732],[29.685,45.755],[29.628,45.722],[29.601,45.6],[29.67,45.541],[29.727,45.343],[29.706,45.26],[29.568,45.371],[29.404,45.42],[28.894,45.29],[28.782,45.31],[28.761,45.234],[28.451,45.292],[28.212,45.45],[28.499,45.518],[28.492,45.666],[28.729,45.852],[28.739,45.937],[28.948,46.05],[29.006,46.176],[28.931,46.362],[28.958,46.458],[29.186,46.524],[29.205,46.379],[29.305,46.467],[29.615,46.399],[29.707,46.449],[29.838,46.351],[30.076,46.378],[30.131,46.423],[29.924,46.539],[29.942,46.724],[29.878,46.829],[29.572,46.964],[29.511,47.128],[29.539,47.271],[29.135,47.49],[29.211,47.775],[29.125,47.965],[28.923,47.951],[28.774,48.12],[28.53,48.15],[28.463,48.091],[28.423,48.147],[28.341,48.144],[28.347,48.213],[28.291,48.239],[28.088,48.257],[27.82,48.416],[27.549,48.478],[27.229,48.371],[26.847,48.387],[26.619,48.26],[26.306,48.204],[26.163,47.993],[25.464,47.911],[25.17,47.823],[25.074,47.746],[24.893,47.718],[24.579,47.931],[24.484,47.947],[24.178,47.906],[23.669,47.992],[23.408,47.99],[23.139,48.087],[23.055,48.007],[22.877,47.947],[22.769,48.11],[22.582,48.134],[22.52,48.205],[22.35,48.256],[22.254,48.407],[22.132,48.405],[22.143,48.569],[22.295,48.686],[22.539,49.073],[22.84,49.039],[22.847,49.081],[22.706,49.171],[22.732,49.295],[22.649,49.539],[22.706,49.606],[23.036,49.899],[23.712,50.377],[23.973,50.41],[24.09,50.53],[24.095,50.617],[23.978,50.786],[24.096,50.873],[23.986,50.94],[23.664,51.31],[23.68,51.395],[23.605,51.518],[23.609,51.61],[23.792,51.637],[23.978,51.591],[24.362,51.868],[25.267,51.938],[25.925,51.914],[26.453,51.813],[27.142,51.752],[27.296,51.597],[27.69,51.572],[27.7,51.478],[27.859,51.592],[28.011,51.56],[28.184,51.608],[28.599,51.543],[28.648,51.457],[28.731,51.433],[28.85,51.54],[29.102,51.628],[29.346,51.383],[30.161,51.478],[30.309,51.4],[30.333,51.326],[30.545,51.265],[30.633,51.355],[30.533,51.596],[30.584,51.689],[30.755,51.895],[30.981,52.046],[31.574,52.108],[32.122,52.051],[32.283,52.114],[32.363,52.272],[32.435,52.307],[32.806,52.253],[33.287,52.354],[33.735,52.345],[33.922,52.251],[34.113,51.98],[34.398,51.78],[34.379,51.717],[34.121,51.679],[34.201,51.554],[34.23,51.363],[34.275,51.34],[34.214,51.255],[34.76,51.169],[35.064,51.203],[35.158,51.061],[35.312,51.044],[35.315,50.95],[35.44,50.728],[35.392,50.611],[35.412,50.54],[35.591,50.369],[35.674,50.346],[35.89,50.437],[36.116,50.409],[36.306,50.28],[36.5,50.28],[36.619,50.209],[36.759,50.292],[37.423,50.411],[37.582,50.292],[37.704,50.109],[38.047,49.92],[38.147,49.939],[38.178,50.025],[38.259,50.052],[38.451,49.964],[38.648,49.953],[38.918,49.825],[39.175,49.856],[39.303,49.742],[39.463,49.728],[39.781,49.572],[40.081,49.577],[40.058,49.432],[40.126,49.369],[40.109,49.252],[39.89,49.064],[39.687,49.008],[39.753,48.914],[40.004,48.822],[39.793,48.808],[39.705,48.739],[39.645,48.591],[39.836,48.543],[39.89,48.36],[39.847,48.303],[39.958,48.269],[39.776,47.964],[39.779,47.888],[39.658,47.841],[38.9,47.855],[38.822,47.837],[38.641,47.666],[38.369,47.61],[38.287,47.559],[38.201,47.321],[38.281,47.277],[38.201,47.175],[38.214,47.091]],[[9.524,47.524],[9.626,47.467],[9.484,47.173],[9.488,47.062],[9.845,47.007],[9.878,46.938],[10.133,46.852],[10.349,46.985],[10.455,46.899],[10.398,46.665],[10.431,46.55],[10.272,46.565],[10.196,46.621],[10.087,46.6],[10.038,46.483],[10.128,46.238],[10.041,46.238],[9.939,46.362],[9.529,46.306],[9.428,46.482],[9.304,46.496],[9.26,46.475],[9.251,46.287],[9.003,46.015],[9.047,45.876],[8.954,45.83],[8.778,45.996],[8.819,46.077],[8.642,46.111],[8.458,46.246],[8.423,46.446],[8.096,46.271],[8.125,46.161],[7.993,46.016],[7.788,45.922],[7.539,45.978],[7.129,45.88],[7.056,45.904],[6.772,46.165],[6.817,46.275],[6.758,46.416],[6.429,46.431],[6.235,46.333],[6.273,46.252],[6.199,46.193],[5.971,46.151],[5.97,46.215],[6.096,46.279],[6.123,46.379],[6.06,46.428],[6.161,46.611],[6.41,46.755],[6.456,46.948],[6.667,47.027],[6.952,47.267],[7.001,47.339],[6.9,47.394],[7.053,47.489],[7.266,47.426],[7.42,47.455],[7.495,47.547],[7.616,47.593],[7.927,47.564],[8.454,47.596],[8.567,47.652],[8.403,47.688],[8.573,47.776],[8.881,47.656],[9.183,47.671],[9.524,47.524]],[[22.539,49.073],[22.295,48.686],[22.143,48.569],[22.111,48.393],[21.721,48.347],[21.451,48.552],[21.067,48.506],[20.867,48.546],[20.49,48.527],[20.334,48.296],[19.899,48.131],[19.625,48.223],[19.467,48.111],[18.914,48.051],[18.792,48.0],[18.75,47.939],[18.778,47.853],[18.724,47.787],[17.762,47.77],[17.635,47.81],[17.317,47.991],[17.086,48.04],[16.865,48.387],[16.985,48.677],[17.136,48.841],[17.483,48.828],[17.758,48.888],[18.086,49.065],[18.161,49.257],[18.596,49.491],[18.938,49.498],[18.968,49.396],[19.149,49.4],[19.25,49.511],[19.442,49.598],[19.63,49.407],[19.774,49.372],[19.757,49.204],[19.802,49.192],[19.916,49.221],[20.058,49.181],[20.164,49.316],[20.363,49.385],[20.616,49.392],[20.947,49.317],[21.079,49.418],[21.35,49.429],[21.89,49.343],[22.02,49.21],[22.539,49.073]],[[16.516,46.5],[16.321,46.535],[16.237,46.484],[16.227,46.373],[16.067,46.371],[15.933,46.278],[15.636,46.201],[15.593,46.14],[15.666,46.048],[15.652,45.862],[15.277,45.733],[15.354,45.66],[15.284,45.58],[15.339,45.467],[15.242,45.441],[14.955,45.5],[14.793,45.478],[14.569,45.657],[14.37,45.481],[13.993,45.509],[13.879,45.428],[13.615,45.477],[13.578,45.517],[13.875,45.615],[13.722,45.761],[13.583,45.812],[13.601,45.98],[13.488,45.987],[13.486,46.04],[13.633,46.177],[13.421,46.212],[13.378,46.262],[13.4,46.318],[13.68,46.463],[13.7,46.52],[14.55,46.4],[14.893,46.606],[15.439,46.63],[15.76,46.711],[15.958,46.678],[15.977,46.801],[16.093,46.863],[16.284,46.857],[16.381,46.639],[16.516,46.5]],[[21.36,44.827],[21.636,44.71],[21.909,44.666],[22.093,44.542],[22.498,44.706],[22.721,44.606],[22.734,44.57],[22.554,44.54],[22.502,44.49],[22.531,44.378],[22.705,44.238],[22.627,44.194],[22.597,44.075],[22.421,44.007],[22.37,43.781],[22.555,43.454],[22.977,43.188],[22.942,43.097],[22.706,42.884],[22.467,42.842],[22.436,42.629],[22.532,42.481],[22.422,42.329],[22.24,42.358],[21.562,42.248],[21.519,42.328],[21.61,42.387],[21.753,42.67],[21.391,42.751],[21.403,42.832],[21.237,42.913],[21.057,43.092],[20.844,43.173],[20.801,43.261],[20.623,43.199],[20.658,43.1],[20.624,43.034],[20.475,42.953],[20.469,42.858],[20.344,42.828],[20.34,42.893],[20.268,42.935],[19.614,43.173],[19.219,43.45],[19.194,43.533],[19.254,43.584],[19.451,43.562],[19.495,43.643],[19.488,43.704],[19.245,43.965],[19.55,43.987],[19.584,44.043],[19.118,44.36],[19.151,44.527],[19.292,44.697],[19.349,44.881],[19.237,44.914],[19.007,44.869],[18.996,44.904],[19.085,44.927],[19.063,45.137],[19.13,45.152],[19.137,45.196],[19.303,45.167],[19.388,45.173],[19.4,45.212],[19.005,45.4],[19.064,45.515],[18.918,45.601],[18.947,45.656],[18.839,45.836],[18.905,45.932],[19.066,46.01],[19.278,46.003],[19.531,46.155],[20.21,46.126],[20.709,45.735],[20.775,45.75],[20.794,45.468],[21.024,45.322],[21.49,45.148],[21.421,45.033],[21.353,45.009],[21.532,44.901],[21.358,44.862],[21.36,44.827]],[[28.212,45.45],[28.451,45.292],[28.761,45.234],[28.782,45.31],[28.894,45.29],[29.404,45.42],[29.568,45.371],[29.706,45.26],[29.558,44.843],[29.048,44.758],[29.081,44.799],[29.048,44.926],[29.095,44.975],[28.981,44.993],[28.892,44.919],[28.926,44.81],[28.807,44.565],[28.888,44.575],[28.645,44.296],[28.659,43.984],[28.585,43.742],[28.222,43.773],[28.05,43.822],[27.884,43.987],[27.739,43.956],[27.425,44.021],[27.087,44.167],[26.216,44.007],[25.933,43.871],[25.819,43.767],[25.497,43.671],[23.225,43.874],[22.919,43.834],[22.868,43.865],[22.868,43.948],[23.029,44.078],[22.688,44.248],[22.495,44.435],[22.554,44.54],[22.701,44.556],[22.721,44.606],[22.498,44.706],[22.093,44.542],[21.909,44.666],[21.636,44.71],[21.36,44.827],[21.358,44.862],[21.532,44.901],[21.353,45.009],[21.421,45.033],[21.49,45.148],[21.024,45.322],[20.794,45.468],[20.775,45.75],[20.709,45.735],[20.581,45.869],[20.359,45.975],[20.242,46.109],[20.508,46.167],[20.614,46.133],[20.76,46.246],[21.04,46.242],[21.122,46.282],[21.192,46.392],[21.265,46.412],[21.252,46.486],[21.32,46.608],[21.497,46.704],[21.494,46.79],[21.653,46.964],[21.661,47.044],[21.995,47.396],[22.0,47.505],[22.291,47.728],[22.608,47.766],[23.139,48.087],[23.408,47.99],[23.669,47.992],[24.178,47.906],[24.579,47.931],[24.893,47.718],[25.074,47.746],[25.17,47.823],[25.464,47.911],[26.163,47.993],[26.306,48.204],[26.714,48.263],[26.981,48.155],[27.337,47.64],[27.614,47.341],[28.072,46.978],[28.239,46.641],[28.244,46.451],[28.1,45.973],[28.16,45.647],[28.075,45.599],[28.212,45.45]],[[23.605,51.518],[23.68,51.395],[23.664,51.31],[23.986,50.94],[24.096,50.873],[23.978,50.786],[24.095,50.617],[24.09,50.53],[23.973,50.41],[23.712,50.377],[23.409,50.174],[22.649,49.539],[22.732,49.295],[22.706,49.171],[22.847,49.081],[22.81,49.021],[22.02,49.21],[21.89,49.343],[21.64,49.412],[21.079,49.418],[21.001,49.34],[20.868,49.315],[20.616,49.392],[20.363,49.385],[20.164,49.316],[20.058,49.181],[19.757,49.204],[19.774,49.372],[19.63,49.407],[19.442,49.598],[19.25,49.511],[19.149,49.4],[18.968,49.396],[18.938,49.498],[18.832,49.511],[18.807,49.614],[18.595,49.758],[18.562,49.879],[18.305,49.914],[18.05,50.032],[17.831,49.983],[17.627,50.116],[17.589,50.157],[17.735,50.231],[17.702,50.307],[17.415,50.255],[17.152,50.378],[16.88,50.427],[16.99,50.237],[16.639,50.102],[16.21,50.424],[16.42,50.574],[16.282,50.656],[16.007,50.612],[15.731,50.74],[15.354,50.812],[15.259,50.959],[14.994,51.014],[14.983,50.887],[14.809,50.859],[15.017,51.253],[14.906,51.463],[14.725,51.524],[14.739,51.627],[14.602,51.832],[14.753,52.082],[14.705,52.11],[14.68,52.25],[14.555,52.36],[14.619,52.529],[14.514,52.646],[14.129,52.878],[14.411,53.199],[14.259,53.73],[14.583,53.639],[14.558,53.823],[14.214,53.871],[14.198,53.919],[16.186,54.29],[16.56,54.554],[16.885,54.596],[17.262,54.73],[18.086,54.836],[18.323,54.838],[18.759,54.685],[18.8,54.633],[18.436,54.745],[18.67,54.431],[18.976,54.349],[19.407,54.386],[19.604,54.459],[22.168,54.36],[22.732,54.35],[22.894,54.391],[23.454,54.143],[23.599,53.599],[23.887,53.028],[23.901,52.704],[23.411,52.516],[23.175,52.287],[23.598,52.103],[23.652,52.04],[23.626,51.809],[23.545,51.71],[23.54,51.619],[23.605,51.518]],[[19.194,43.533],[19.219,43.45],[19.614,43.173],[19.944,43.082],[20.268,42.935],[20.348,42.853],[20.193,42.755],[20.054,42.76],[20.064,42.547],[19.788,42.476],[19.728,42.635],[19.654,42.629],[19.281,42.173],[19.361,42.069],[19.342,41.869],[19.186,41.949],[19.122,42.06],[18.894,42.249],[18.633,42.378],[18.646,42.443],[18.517,42.433],[18.438,42.523],[18.546,42.642],[18.466,42.777],[18.46,42.998],[18.624,43.028],[18.674,43.231],[18.851,43.346],[19.027,43.292],[18.951,43.527],[19.194,43.533]],[[9.58,47.057],[9.479,47.098],[9.528,47.271],[9.611,47.107],[9.58,47.057]],[[7.021,45.926],[7.129,45.88],[7.539,45.978],[7.788,45.922],[7.993,46.016],[8.125,46.161],[8.096,46.271],[8.423,46.446],[8.458,46.246],[8.642,46.111],[8.819,46.077],[8.778,45.996],[8.954,45.83],[9.047,45.876],[9.003,46.015],[9.251,46.287],[9.26,46.475],[9.304,46.496],[9.428,46.482],[9.529,46.306],[9.939,46.362],[10.081,46.228],[10.145,46.254],[10.038,46.483],[10.087,46.6],[10.196,46.621],[10.272,46.565],[10.431,46.55],[10.398,46.665],[10.453,46.865],[10.993,46.777],[11.134,46.936],[11.244,46.976],[11.776,46.986],[12.169,47.082],[12.201,47.061],[12.131,46.985],[12.154,46.935],[12.388,46.703],[13.7,46.52],[13.68,46.463],[13.4,46.318],[13.378,46.262],[13.421,46.212],[13.633,46.177],[13.486,46.04],[13.488,45.987],[13.601,45.98],[13.583,45.812],[13.722,45.761],[13.875,45.615],[13.72,45.588],[13.783,45.627],[13.628,45.771],[13.465,45.71],[13.206,45.771],[13.03,45.638],[12.761,45.544],[12.432,45.468],[12.536,45.545],[12.492,45.546],[12.274,45.446],[12.226,45.242],[12.392,45.04],[12.523,44.968],[12.464,44.845],[12.384,44.798],[12.279,44.832],[12.248,44.723],[12.396,44.224],[12.691,43.995],[13.564,43.571],[13.805,43.18],[14.01,42.69],[14.541,42.244],[15.169,41.934],[15.964,41.939],[16.165,41.896],[16.189,41.814],[16.151,41.758],[15.914,41.621],[15.9,41.512],[16.552,41.232],[17.103,41.062],[17.474,40.841],[17.955,40.655],[18.461,40.221],[18.486,40.105],[18.393,39.904],[18.344,39.821],[18.078,39.937],[17.865,40.28],[17.396,40.34],[17.258,40.399],[17.18,40.503],[17.031,40.513],[16.928,40.458],[16.67,40.137],[16.53,39.86],[16.522,39.748],[16.598,39.639],[16.824,39.578],[17.115,39.381],[17.175,38.998],[17.099,38.919],[16.951,38.94],[16.617,38.8],[16.559,38.715],[16.546,38.409],[16.282,38.25],[16.057,37.942],[15.725,37.939],[15.646,38.034],[15.643,38.175],[15.7,38.262],[15.822,38.303],[15.905,38.483],[15.879,38.614],[15.927,38.672],[16.197,38.759],[16.21,38.941],[16.107,39.024],[16.024,39.354],[15.693,39.99],[15.585,40.053],[15.295,40.07],[14.951,40.239],[14.929,40.31],[14.986,40.377],[14.948,40.469],[14.766,40.668],[14.34,40.599],[14.461,40.729],[14.309,40.813],[14.044,40.812],[14.048,40.87],[13.86,41.13],[13.733,41.236],[13.247,41.289],[13.089,41.244],[12.849,41.409],[12.631,41.47],[12.075,41.941],[11.807,42.082],[11.637,42.288],[11.296,42.423],[11.103,42.417],[11.185,42.457],[11.168,42.535],[10.803,42.804],[10.708,42.936],[10.515,42.968],[10.521,43.204],[10.321,43.513],[10.246,43.852],[10.188,43.948],[10.048,44.02],[9.731,44.101],[9.289,44.319],[8.766,44.422],[8.552,44.346],[8.005,43.877],[7.493,43.767],[7.482,43.865],[7.677,44.083],[7.637,44.165],[7.319,44.138],[6.9,44.336],[6.843,44.511],[7.031,44.717],[6.993,44.827],[6.738,44.921],[6.635,45.068],[6.628,45.118],[6.692,45.144],[6.842,45.136],[7.078,45.24],[7.146,45.382],[6.791,45.741],[6.804,45.815],[7.021,45.926]],[[22.132,48.405],[22.254,48.407],[22.35,48.256],[22.52,48.205],[22.582,48.134],[22.769,48.11],[22.877,47.947],[22.608,47.766],[22.291,47.728],[22.038,47.537],[21.995,47.396],[21.869,47.305],[21.785,47.138],[21.661,47.044],[21.653,46.964],[21.494,46.79],[21.497,46.704],[21.295,46.572],[21.265,46.412],[21.04,46.242],[20.76,46.246],[20.614,46.133],[20.508,46.167],[20.242,46.109],[19.613,46.169],[19.278,46.003],[19.087,46.016],[18.928,45.931],[18.666,45.907],[18.437,45.767],[17.807,45.79],[17.607,45.914],[17.311,45.996],[16.871,46.339],[16.516,46.5],[16.381,46.639],[16.284,46.857],[16.093,46.863],[16.253,46.972],[16.453,47.007],[16.493,47.123],[16.417,47.223],[16.463,47.273],[16.443,47.4],[16.623,47.448],[16.677,47.536],[16.64,47.609],[16.421,47.674],[16.591,47.751],[16.786,47.679],[17.067,47.708],[17.03,47.837],[17.147,48.006],[17.317,47.991],[17.762,47.77],[18.724,47.787],[18.778,47.853],[18.75,47.939],[18.792,48.0],[18.914,48.051],[19.467,48.111],[19.625,48.223],[19.899,48.131],[20.334,48.296],[20.49,48.527],[20.867,48.546],[21.067,48.506],[21.451,48.552],[21.721,48.347],[22.132,48.405]],[[9.524,47.524],[9.183,47.671],[8.881,47.656],[8.573,47.776],[8.403,47.688],[8.567,47.652],[8.454,47.596],[7.927,47.564],[7.565,47.607],[7.529,47.674],[7.617,48.157],[7.838,48.636],[8.14,48.886],[8.135,48.974],[7.611,49.062],[7.451,49.152],[7.037,49.113],[7.001,49.18],[6.891,49.208],[6.735,49.161],[6.534,49.395],[6.344,49.453],[6.378,49.6],[6.485,49.708],[6.487,49.798],[6.256,49.872],[6.138,49.974],[6.108,50.094],[6.175,50.233],[6.364,50.316],[6.341,50.452],[6.179,50.523],[6.236,50.597],[5.994,50.75],[6.048,50.905],[5.858,51.03],[6.13,51.147],[6.076,51.224],[6.199,51.45],[5.949,51.803],[6.167,51.881],[6.356,51.825],[6.742,51.911],[6.802,51.98],[6.716,52.036],[6.725,52.08],[7.02,52.266],[7.002,52.419],[6.749,52.464],[6.692,52.53],[6.748,52.634],[7.033,52.651],[7.179,52.966],[7.197,53.282],[7.053,53.376],[7.107,53.557],[7.206,53.655],[8.009,53.691],[8.167,53.543],[8.108,53.468],[8.245,53.445],[8.334,53.606],[8.493,53.514],[8.495,53.394],[8.528,53.781],[8.619,53.875],[9.206,53.856],[9.585,53.6],[9.784,53.555],[9.631,53.6],[9.312,53.859],[8.978,53.926],[8.904,54.0],[8.907,54.261],[8.78,54.313],[8.645,54.295],[8.648,54.398],[8.952,54.468],[8.957,54.538],[8.682,54.792],[8.67,54.903],[8.903,54.897],[9.255,54.808],[9.616,54.855],[9.892,54.781],[10.022,54.674],[10.029,54.581],[9.869,54.472],[10.143,54.488],[10.212,54.409],[10.36,54.438],[10.732,54.316],[11.013,54.379],[11.064,54.281],[11.009,54.181],[10.811,54.075],[10.918,53.995],[11.104,54.009],[11.4,53.945],[11.796,54.145],[12.111,54.168],[12.575,54.467],[13.029,54.411],[13.147,54.283],[13.448,54.141],[13.724,54.153],[13.822,54.019],[13.866,53.853],[14.025,53.767],[14.259,53.73],[14.411,53.199],[14.129,52.878],[14.514,52.646],[14.619,52.529],[14.555,52.36],[14.68,52.25],[14.705,52.11],[14.753,52.082],[14.602,51.832],[14.739,51.627],[14.725,51.524],[14.936,51.435],[15.017,51.253],[14.964,51.095],[14.767,50.818],[14.614,50.856],[14.624,50.915],[14.546,50.994],[14.32,51.038],[14.256,51.002],[14.369,50.899],[13.557,50.705],[13.436,50.601],[13.375,50.622],[13.181,50.51],[13.016,50.49],[12.943,50.406],[12.765,50.431],[12.549,50.393],[12.277,50.181],[12.135,50.311],[12.09,50.269],[12.208,50.098],[12.512,49.896],[12.391,49.74],[12.632,49.461],[13.289,49.097],[13.401,48.978],[13.548,48.96],[13.77,48.816],[13.815,48.767],[13.785,48.587],[13.675,48.523],[13.487,48.582],[13.375,48.361],[12.897,48.204],[12.76,48.107],[12.954,47.891],[12.898,47.722],[13.034,47.699],[13.054,47.655],[13.014,47.478],[12.809,47.542],[12.771,47.639],[12.686,47.669],[12.483,47.637],[12.209,47.718],[12.186,47.62],[11.717,47.583],[11.298,47.425],[11.042,47.393],[10.981,47.398],[10.873,47.52],[10.439,47.552],[10.369,47.366],[10.183,47.279],[10.2,47.363],[10.066,47.393],[10.06,47.449],[9.972,47.505],[9.749,47.576],[9.524,47.524]],[[7.616,47.593],[7.343,47.433],[7.203,47.433],[7.136,47.49],[6.968,47.453],[6.9,47.394],[7.001,47.323],[6.667,47.027],[6.456,46.948],[6.41,46.755],[6.161,46.611],[6.068,46.459],[6.123,46.379],[6.096,46.279],[5.97,46.215],[6.007,46.142],[6.199,46.193],[6.273,46.252],[6.235,46.333],[6.429,46.431],[6.776,46.407],[6.817,46.275],[6.772,46.165],[7.021,45.926],[6.804,45.815],[6.791,45.741],[7.153,45.401],[7.078,45.24],[6.842,45.136],[6.692,45.144],[6.628,45.118],[6.635,45.068],[6.738,44.921],[6.993,44.827],[7.031,44.717],[6.843,44.511],[6.9,44.336],[7.319,44.138],[7.637,44.165],[7.677,44.083],[7.482,43.865],[7.493,43.767],[7.395,43.765],[7.181,43.659],[6.717,43.374],[6.57,43.199],[6.116,43.072],[5.809,43.098],[5.672,43.178],[5.407,43.229],[5.32,43.345],[5.073,43.367],[5.06,43.445],[4.712,43.373],[4.224,43.48],[4.053,43.593],[3.911,43.563],[3.259,43.193],[3.052,42.915],[3.091,42.591],[3.211,42.431],[2.891,42.456],[2.67,42.393],[2.652,42.34],[2.2,42.421],[2.033,42.354],[1.706,42.503],[1.74,42.557],[1.71,42.604],[1.501,42.643],[1.428,42.596],[1.349,42.691],[0.764,42.838],[0.67,42.836],[0.632,42.69],[-0.041,42.689],[-0.299,42.825],[-0.586,42.799],[-0.763,42.94],[-1.175,43.021],[-1.3,43.101],[-1.371,43.038],[-1.461,43.052],[-1.411,43.24],[-1.713,43.307],[-1.794,43.407],[-1.631,43.438],[-1.485,43.564],[-1.246,44.56],[-1.171,44.662],[-1.077,44.69],[-1.153,44.764],[-1.245,44.667],[-1.189,45.161],[-1.081,45.532],[-0.826,45.381],[-0.691,45.093],[-0.548,45.001],[-0.641,45.09],[-0.791,45.468],[-1.196,45.714],[-1.21,45.771],[-1.032,45.741],[-1.104,45.925],[-1.146,46.311],[-1.392,46.35],[-1.787,46.515],[-2.059,46.81],[-2.09,46.921],[-2.019,47.038],[-2.197,47.163],[-2.108,47.263],[-2.028,47.274],[-1.743,47.216],[-1.975,47.311],[-2.353,47.279],[-2.503,47.312],[-2.53,47.382],[-2.428,47.471],[-2.554,47.527],[-2.77,47.514],[-2.797,47.537],[-2.733,47.602],[-2.787,47.626],[-2.964,47.601],[-3.159,47.695],[-3.444,47.711],[-3.901,47.838],[-4.312,47.823],[-4.428,47.969],[-4.679,48.04],[-4.329,48.17],[-4.577,48.29],[-4.241,48.304],[-4.393,48.368],[-4.719,48.363],[-4.763,48.45],[-4.721,48.54],[-4.531,48.62],[-4.059,48.708],[-3.715,48.71],[-3.471,48.813],[-3.231,48.841],[-3.003,48.791],[-2.692,48.537],[-2.446,48.648],[-2.079,48.645],[-2.004,48.582],[-1.906,48.697],[-1.825,48.631],[-1.376,48.653],[-1.48,48.698],[-1.565,48.806],[-1.583,49.202],[-1.813,49.49],[-1.87,49.595],[-1.856,49.684],[-1.259,49.68],[-1.232,49.495],[-1.139,49.388],[-0.163,49.297],[0.417,49.448],[0.439,49.473],[0.129,49.508],[0.109,49.558],[0.187,49.703],[0.616,49.863],[1.246,49.998],[1.593,50.252],[1.552,50.294],[1.579,50.739],[1.672,50.885],[1.913,50.991],[2.525,51.097],[2.597,50.876],[2.759,50.751],[2.84,50.712],[3.107,50.779],[3.235,50.663],[3.273,50.532],[3.595,50.477],[3.689,50.306],[3.748,50.344],[3.95,50.336],[4.175,50.246],[4.135,50.144],[4.192,50.094],[4.137,50],[4.176,49.96],[4.545,49.96],[4.819,50.153],[4.861,50.136],[4.79,49.96],[4.868,49.788],[5.279,49.678],[5.507,49.511],[5.79,49.538],[6.011,49.445],[6.242,49.494],[6.534,49.395],[6.735,49.161],[6.891,49.208],[7.001,49.18],[7.037,49.113],[7.451,49.152],[7.611,49.062],[8.135,48.974],[8.14,48.886],[7.838,48.636],[7.617,48.157],[7.529,47.674],[7.616,47.593]],[[18.832,49.511],[18.596,49.491],[18.161,49.257],[18.086,49.065],[17.758,48.888],[17.483,48.828],[17.136,48.841],[16.953,48.599],[16.884,48.704],[16.544,48.796],[16.367,48.739],[16.057,48.755],[15.825,48.864],[14.993,49.001],[14.923,48.771],[14.822,48.774],[14.707,48.672],[14.691,48.599],[14.489,48.626],[14.368,48.576],[14.19,48.579],[14.049,48.602],[13.989,48.692],[13.548,48.96],[13.441,48.956],[12.917,49.33],[12.813,49.329],[12.681,49.415],[12.391,49.74],[12.512,49.896],[12.208,50.098],[12.09,50.302],[12.175,50.288],[12.277,50.181],[12.549,50.393],[12.765,50.431],[12.943,50.406],[13.016,50.49],[13.181,50.51],[13.375,50.622],[13.436,50.601],[13.557,50.705],[14.369,50.899],[14.256,51.002],[14.283,51.029],[14.546,50.994],[14.624,50.915],[14.614,50.856],[14.723,50.815],[14.983,50.887],[14.994,51.014],[15.259,50.959],[15.354,50.812],[15.731,50.74],[16.007,50.612],[16.282,50.656],[16.36,50.621],[16.42,50.574],[16.379,50.517],[16.21,50.424],[16.639,50.102],[16.99,50.237],[16.88,50.427],[17.152,50.378],[17.415,50.255],[17.702,50.307],[17.735,50.231],[17.589,50.157],[17.627,50.116],[17.831,49.983],[18.05,50.032],[18.305,49.914],[18.562,49.879],[18.595,49.758],[18.807,49.614],[18.832,49.511]],[[13.578,45.517],[13.879,45.428],[13.993,45.509],[14.37,45.481],[14.569,45.657],[14.793,45.478],[15.339,45.467],[15.284,45.58],[15.354,45.66],[15.277,45.733],[15.652,45.862],[15.676,45.984],[15.597,46.109],[15.609,46.172],[16.001,46.305],[16.067,46.371],[16.227,46.373],[16.237,46.484],[16.321,46.535],[16.748,46.416],[17.311,45.996],[17.607,45.914],[17.807,45.79],[18.358,45.753],[18.534,45.796],[18.666,45.907],[18.905,45.932],[18.839,45.836],[18.947,45.656],[18.918,45.601],[19.064,45.515],[19.005,45.4],[19.33,45.268],[19.401,45.189],[19.137,45.196],[19.13,45.152],[19.063,45.137],[19.085,44.927],[18.941,44.865],[18.788,44.915],[18.746,45.027],[18.663,45.077],[17.996,45.142],[17.813,45.078],[17.654,45.163],[17.503,45.12],[17.125,45.172],[16.919,45.277],[16.791,45.197],[16.531,45.217],[16.293,45.009],[16.028,45.19],[15.888,45.216],[15.788,45.179],[15.737,44.766],[16.103,44.521],[16.214,44.215],[16.3,44.125],[17.085,43.517],[17.274,43.446],[17.293,43.306],[17.65,43.007],[17.585,42.938],[16.903,43.392],[16.394,43.543],[15.986,43.52],[15.942,43.657],[15.499,43.909],[15.186,44.172],[15.123,44.257],[15.471,44.272],[14.981,44.603],[14.895,44.707],[14.907,44.971],[14.855,45.081],[14.55,45.298],[14.313,45.338],[14.236,45.16],[13.966,44.836],[13.861,44.837],[13.629,45.108],[13.517,45.482],[13.578,45.517]],[[17.194,43.126],[16.679,43.123],[16.376,43.214],[16.521,43.229],[17.194,43.126]],[[16.785,43.271],[16.423,43.317],[16.449,43.387],[16.891,43.315],[16.785,43.271]],[[15.231,44.062],[15.247,44.027],[15.066,44.158],[15.231,44.062]],[[14.81,44.977],[14.687,44.956],[14.438,45.099],[14.571,45.225],[14.81,44.977]],[[14.831,44.759],[14.857,44.715],[14.66,44.8],[14.754,44.845],[14.831,44.759]],[[15.188,44.336],[15.163,44.309],[14.913,44.486],[14.742,44.697],[15.24,44.35],[15.188,44.336]],[[15.189,43.922],[15.136,43.907],[14.865,44.168],[15.189,43.922]],[[15.371,43.974],[15.437,43.9],[15.27,44.011],[15.371,43.974]],[[14.488,44.66],[14.48,44.621],[14.42,44.67],[14.312,44.9],[14.34,45.02],[14.286,45.145],[14.331,45.165],[14.467,44.97],[14.488,44.66]],[[9.528,47.271],[9.626,47.467],[9.524,47.524],[9.749,47.576],[9.972,47.505],[10.06,47.449],[10.066,47.393],[10.2,47.363],[10.183,47.279],[10.369,47.366],[10.439,47.552],[10.873,47.52],[10.981,47.398],[11.042,47.393],[11.298,47.425],[11.717,47.583],[12.186,47.62],[12.209,47.718],[12.483,47.637],[12.686,47.669],[12.771,47.639],[12.809,47.542],[13.014,47.478],[13.054,47.655],[13.034,47.699],[12.898,47.722],[12.954,47.891],[12.76,48.076],[12.814,48.161],[13.375,48.361],[13.487,48.582],[13.724,48.542],[13.785,48.587],[13.815,48.767],[13.989,48.692],[14.049,48.602],[14.691,48.599],[14.707,48.672],[14.822,48.774],[14.923,48.771],[14.993,49.001],[15.825,48.864],[16.057,48.755],[16.367,48.739],[16.544,48.796],[16.884,48.704],[16.953,48.599],[16.865,48.387],[17.147,48.006],[17.03,47.837],[17.067,47.708],[16.786,47.679],[16.591,47.751],[16.421,47.674],[16.64,47.609],[16.677,47.536],[16.623,47.448],[16.443,47.4],[16.463,47.273],[16.417,47.223],[16.493,47.123],[16.461,47.022],[16.253,46.972],[16.037,46.845],[15.977,46.801],[15.958,46.678],[15.76,46.711],[15.439,46.63],[14.893,46.606],[14.55,46.4],[12.479,46.673],[12.388,46.703],[12.154,46.935],[12.131,46.985],[12.201,47.061],[12.169,47.082],[11.776,46.986],[11.244,46.976],[11.134,46.936],[11.025,46.797],[10.927,46.769],[10.689,46.846],[10.479,46.855],[10.415,46.964],[10.349,46.985],[10.133,46.852],[9.878,46.938],[9.845,47.007],[9.58,47.057],[9.611,47.107],[9.528,47.271]]];const LAKES=[[[9.719,47.547],[9.744,47.52],[9.69,47.52],[9.67,47.498],[9.649,47.499],[9.635,47.512],[9.608,47.499],[9.553,47.512],[9.495,47.488],[9.398,47.544],[9.371,47.581],[9.207,47.647],[9.183,47.671],[9.206,47.672],[9.206,47.682],[9.149,47.76],[9.073,47.787],[9.032,47.821],[9.072,47.817],[9.176,47.766],[9.211,47.76],[9.227,47.725],[9.322,47.682],[9.403,47.675],[9.488,47.654],[9.538,47.599],[9.719,47.547]],[[17.87,46.864],[17.846,46.848],[17.563,46.765],[17.474,46.717],[17.31,46.725],[17.258,46.718],[17.248,46.732],[17.263,46.768],[17.365,46.762],[17.386,46.788],[17.423,46.8],[17.496,46.786],[17.575,46.823],[17.64,46.833],[17.672,46.866],[17.821,46.906],[17.838,46.92],[17.893,46.896],[17.902,46.907],[17.895,46.92],[17.865,46.944],[17.996,46.999],[18.023,47.024],[18.037,47.057],[18.112,47.047],[18.169,47.014],[18.169,47.002],[18.119,46.944],[18.078,46.927],[17.92,46.896],[17.9,46.876],[17.87,46.864]],[[9.066,47.723],[9.104,47.701],[9.127,47.671],[9.016,47.679],[8.945,47.654],[8.881,47.656],[8.915,47.656],[8.986,47.687],[9.005,47.704],[8.943,47.734],[8.949,47.746],[9.005,47.732],[8.984,47.752],[9.066,47.723]],[[18.89,49.948],[18.941,49.939],[18.923,49.921],[18.896,49.925],[18.858,49.905],[18.865,49.918],[18.845,49.925],[18.79,49.918],[18.824,49.931],[18.818,49.939],[18.89,49.948]],[[8.846,46.169],[8.842,46.154],[8.746,46.093],[8.742,46.064],[8.753,46.016],[8.738,45.995],[8.649,45.945],[8.606,45.906],[8.604,45.883],[8.621,45.827],[8.57,45.784],[8.621,45.725],[8.594,45.73],[8.566,45.757],[8.549,45.791],[8.567,45.818],[8.574,45.852],[8.566,45.87],[8.521,45.898],[8.494,45.94],[8.56,45.932],[8.616,45.955],[8.714,46.039],[8.7,46.092],[8.733,46.131],[8.795,46.164],[8.846,46.169]],[[10.855,45.896],[10.868,45.88],[10.863,45.838],[10.72,45.67],[10.692,45.597],[10.69,45.576],[10.711,45.581],[10.731,45.518],[10.701,45.449],[10.631,45.467],[10.612,45.481],[10.608,45.504],[10.603,45.481],[10.583,45.472],[10.559,45.474],[10.539,45.484],[10.547,45.491],[10.512,45.498],[10.574,45.549],[10.555,45.581],[10.574,45.587],[10.568,45.599],[10.525,45.608],[10.603,45.642],[10.729,45.73],[10.764,45.787],[10.824,45.844],[10.855,45.896]]];
+const LANDLAB=[[47.6,14.5,"AT"],[48.75,19.5,"SK"],[47.0,19.6,"HU"],[46.05,14.9,"SI"],
+ [45.35,16.4,"HR"],[45.9,11.6,"IT"],[48.1,11.4,"DE"],[46.75,8.3,"CH"],[49.9,20.6,"PL"]];
+
+const VIGS=["SK10","AT10","HU10","SI7","CH40"];
+const owned=()=>new Set(
+  [...document.querySelectorAll("#vig input:checked")].map(i=>i.value));
+const tollKeys=(n,co)=>{const o=owned();
+  return (OVERRIDE[n]||BYLAND[co]||[]).filter(k=>!o.has(k))};
+const tollSum=(n,co)=>tollKeys(n,co).reduce((s,k)=>s+T[k][1],0);
+const trip=x=>fuel(x[4])+tollSum(x[0],x[2]);
+/* Hodnotenie 0–100. Váhy: viditeľnosť je hlavné kritérium, freedive vhodnosť druhé,
+   TOP 5 je môj subjektívny bonus (jedinečnosť, prístup len z vody), obmedzenia sťahujú dole. */
+function score(x){
+  const vis=Math.min(((x[5]+x[6])/2)/25,1)*55;   // 0–55
+  const fd=(x[7]/3)*25;                          // 0–25
+  const top=x[9]?12:0;                           // 12
+  const pen=x[8]===2?16:x[8]===1?5:0;            // −16 / −5
+  return Math.max(0,Math.min(100,Math.round(vis+fd+top+8-pen)));
+}
+const stars=v=>{const n=Math.max(1,Math.min(5,Math.round(v/20)));
+  return "★".repeat(n)+"☆".repeat(5-n)};
+const num=v=>v.toFixed(2).replace(".",L==="sk"?",":".");
+const slug=n=>n.replace(/[^a-zA-Z0-9]/g,"");
+
+function chrome(){
+  const c=t();
+  document.documentElement.lang=L;
+  $("h1").innerHTML=c.h1; $("sub").textContent=c.sub; $("lang").textContent=c.lang;
+  $("chartTitle").textContent=MODE==="map"?c.mapTitle:c.chartTitle;
+  $("chartHint").textContent=MODE==="map"?c.mapHint:c.chartHint;
+  $("segChart").textContent=c.segChart; $("segMap").textContent=c.segMap;
+  $("gmap").textContent=c.gmap;
+  $("legend").innerHTML=`<span><i class="sw" style="background:var(--w-lake)"></i>${c.legend[0]}</span>`
+   +`<span><i class="sw" style="background:var(--w-sea)"></i>${c.legend[1]}</span>`
+   +`<span><i class="sw" style="background:var(--w-river)"></i>${c.legend[2]}</span>`
+   +`<span id="legNote" style="color:var(--ink-3)">${
+      MODE==="map"?c.legend[4]:c.legend[3]}</span>`;
+  ["C","W","D","S","F","Lkm","Eur","Q","V","MaxH","MinV","MaxC"]
+    .forEach(k=>$("l"+k).textContent=c["l"+k]);
+  $("q").placeholder=c.qph; $("lF").parentNode.title=c.tipF; $("reset").textContent=c.reset;
+
+  const had=$("vig").children.length
+    ? new Set([...document.querySelectorAll("#vig input:checked")].map(i=>i.value))
+    : new Set(["SK10","AT10"]);
+  $("vig").innerHTML=VIGS.map(k=>
+    `<label class="cchip"><input type="checkbox" value="${k}"${had.has(k)?" checked":""}> ${
+      L==="sk"?T[k][2]:T[k][3]} <span class="n">${
+      L==="sk"?num(T[k][1])+" €":"€"+num(T[k][1])}</span></label>`).join("");
+
+  const keep={fC:$("fC").value,fW:$("fW").value,fD:$("fD").value,fS:$("fS").value};
+  const opt=(id,pairs)=>{$(id).innerHTML=pairs.map(([v,l])=>
+    `<option value="${v}">${l}</option>`).join("");};
+  opt("fC",[["all",c.all],...[...new Set(D.map(r=>r[2]))].sort()
+    .map(x=>[x,`${c.cname[x]||x} (${x})`])]);
+  opt("fW",[["all",c.all],...Object.entries(c.water).map(([k,v])=>[k,v])]);
+  opt("fD",[["all",c.all],...[1,2,3].map(k=>[k,c.dur[k]])]);
+  opt("fS",Object.entries(c.sort).map(([k,v])=>[k,v]));
+  Object.entries(keep).forEach(([id,v])=>{if(v)$(id).value=v});
+
+  $("tollTitle").textContent=c.tollTitle; $("tollLead").textContent=c.tollLead;
+  ["thT1","thT2","thT3"].forEach((id,i)=>$(id).textContent=c.thT[i]);
+  $("banTitle").textContent=c.banTitle; $("banLead").textContent=c.banLead;
+  ["thB1","thB2"].forEach((id,i)=>$(id).textContent=c.thB[i]);
+  $("tolls").innerHTML=TOLLS.map(x=>`<tr><td>${L==="sk"?x[2]:x[3]}</td>`
+   +`<td class="mono" style="text-align:right;white-space:nowrap">${
+     L==="sk"?num(x[1])+" €":"€"+num(x[1])}</td><td>${L==="sk"?x[4]:x[5]}</td></tr>`).join("");
+  $("bans").innerHTML=BANS.map(b=>`<tr><td>${L==="sk"?b[0]:b[1]}</td>`
+   +`<td>${L==="sk"?b[2]:b[3]}</td></tr>`).join("");
+  $("foot").innerHTML=c.foot;
+  themeLabel();
+}
+
+function view(){
+  const cy=$("fC").value,w=$("fW").value,d=$("fD").value,
+        q=$("q").value.trim().toLowerCase(),f=$("fF").checked,s=$("fS").value,
+        mh=+$("maxH").value,mv=+$("minV").value,mc=+$("maxC").value;
+  const r=D.filter(x=>(cy==="all"||x[2]===cy)&&(w==="all"||x[3]===w)
+    &&(d==="all"||x[1]==+d)&&(!f||x[7]>=2)
+    &&x[4]<=mh&&x[6]>=mv&&(mc>=300||trip(x)<=mc)
+    &&(!q||(x[0]+" "+txt(x).join(" ")).toLowerCase().includes(q)));
+  r.sort((a,b)=>s==="time"?a[4]-b[4]:s==="cost"?trip(a)-trip(b):s==="rating"?score(b)-score(a)||b[6]-a[6]:(b[6]-a[6])||(a[4]-b[4]));
+  return r;
+}
+
+function ranges(){
+  const c=t();
+  $("oMaxH").textContent=c.fH(+$("maxH").value);
+  $("oMinV").textContent=c.fV(+$("minV").value);
+  $("oMaxC").textContent=c.fCst(+$("maxC").value);
+}
+
+function cards(){
+  const c=t(),r=view();
+  if(!r.length){$("count").textContent=c.empty;$("cards").innerHTML="";return}
+  $("count").innerHTML=c.count(r.length,Math.round(Math.min(...r.map(trip))));
+  $("cards").innerHTML=r.map(x=>{
+    const[n,cat,co,w,h,v1,v2,fd,flag,top,sc]=x, [desc,sup,stxt,note]=txt(x);
+    const vm=(v1+v2)/2, keys=tollKeys(n,co), id=slug(n), on=SEL===id;
+    return`<article class="card${on?" sel":""}" id="c-${id}">
+      ${on?`<span class="selmark">${c.picked}</span>`:""}
+      <div class="ctop"><h3 class="cname">${n}</h3><span class="cflag">${co}</span></div>
+      <div class="pills">
+        <span class="pill">${c.durShort[cat]} · ${String(h).replace(".",L==="sk"?",":".")} h</span>
+        <span class="pill wt" style="color:${wColor(w)}">${c.wShort[w]}</span>
+        ${top?`<span class="pill top">${c.top}</span>`:""}
+        ${flag===2?`<span class="pill ban">${c.check}</span>`
+          :flag===1?`<span class="pill perm">${c.heads}</span>`:""}
+      </div>
+      <p class="desc">${desc}</p>
+      <div class="rows">
+        <div class="row"><span class="k">${c.kRate}</span><span class="v"><span class="stars">${stars(score(x))}</span><span class="mono" style="color:var(--ink-3)"> ${score(x)}/100</span></span></div>
+        <div class="row"><span class="k">${c.kVis}</span><span class="v mono">${v1}–${v2} m
+          <span class="visbar"><i style="width:${Math.min(vm/25*100,100)}%;
+          background:${visColor(vm)}"></i></span></span></div>
+        <div class="row"><span class="k">${c.kSup}</span><span class="v">${sup}</span></div>
+        <div class="row"><span class="k">${c.kSleep}</span><span class="v"><span
+          class="slp ${sc}">${c.sleep[sc]}</span>${stxt}</span></div>
+        <div class="row"><span class="k">${c.kToll}</span><span class="v">${
+          keys.length?keys.map(k=>`${L==="sk"?T[k][2]:T[k][3]} <span class="mono">${
+            L==="sk"?num(T[k][1])+" €":"€"+num(T[k][1])}</span>`).join(" · "):c.noToll}</span></div>
+      </div>
+      ${note?`<p class="warnbox${flag===2?" hard":""}">${note}</p>`:""}
+      <div class="cfoot">
+        <span class="cost">${c.roundtrip} <b class="mono">${
+          L==="sk"?Math.round(trip(x))+" €":"€"+Math.round(trip(x))}</b>
+          <span style="color:var(--ink-3)">${
+            c.breakdown(Math.round(fuel(h)),Math.round(tollSum(n,co)))}</span></span>
+        <a class="map" target="_blank" rel="noopener"
+          href="https://www.google.com/maps/search/?api=1&query=${
+            encodeURIComponent(n+" "+co)}">${c.map}</a>
+      </div></article>`}).join("");
+}
+
+function chart(){
+  const r=view(),W=900,H=300,Lm=44,R=14,Tp=16,B=30;
+  const x=h=>Lm+(h/9)*(W-Lm-R), y=v=>Tp+(Math.min(v,30)/30)*(H-Tp-B);
+  let s="";
+  for(let h=0;h<=9;h++)s+=`<line class="grid" x1="${x(h)}" y1="${Tp}" x2="${x(h)}" y2="${H-B}"/>`
+    +`<text class="axl" x="${x(h)}" y="${H-B+14}" text-anchor="middle">${h} h</text>`;
+  for(let v=0;v<=30;v+=10)s+=`<line class="grid" x1="${Lm}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}"/>`
+    +`<text class="axl" x="${Lm-6}" y="${y(v)+3}" text-anchor="end">${v} m</text>`;
+  r.forEach(d=>{const id=slug(d[0]),on=SEL===id;
+    s+=`<circle class="dot" cx="${x(d[4])}" cy="${y((d[5]+d[6])/2)}"
+    r="${on?9:d[9]?7.5:5.5}" fill="${wColor(d[3])}" fill-opacity="${on||d[9]?1:.62}"
+    stroke="${on?"var(--accent)":d[9]?"var(--ink)":"none"}" stroke-width="${on?3:1.2}"
+    tabindex="0" role="button" aria-label="${d[0]}" data-t="${id}"
+    data-n="${d[0]}" data-h="${d[4]}" data-v="${d[5]}–${d[6]}"></circle>`});
+  $("chart").innerHTML=s;
+  wire($("chart"));
+}
+
+/* ── mapa ── */
+const LAT0=50.4,LON0=8.2,KX=Math.cos(47.5*Math.PI/180),MSC=88,MPAD=18;
+const px=lon=>MPAD+(lon-LON0)*KX*MSC, py=lat=>MPAD+(LAT0-lat)*MSC;
+/* LAND a LAKES sú [lon,lat]; ostatné dáta appky [lat,lon] — preto dve funkcie. */
+const ptsLL=a=>a.map(p=>`${px(p[0]).toFixed(1)},${py(p[1]).toFixed(1)}`).join(" ");
+
+function map(){
+  const r=view(),c=t(),W=900,H=600;
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" class="sea"/>`;
+  LAND.forEach(r=>{s+=`<polygon class="land" points="${ptsLL(r)}"/>`});
+  LAKES.forEach(r=>{s+=`<polygon class="lake" points="${ptsLL(r)}"/>`});
+
+  for(let lon=9;lon<=23;lon++){const X=px(lon);if(X<0||X>W)continue;
+    s+=`<line class="grid" x1="${X}" y1="0" x2="${X}" y2="${H}"/>`;
+    if(lon%2===1)s+=`<text class="axl" x="${X+3}" y="${H-6}">${lon}°E</text>`}
+  for(let lat=44;lat<=50;lat++){const Y=py(lat);if(Y<0||Y>H)continue;
+    s+=`<line class="grid" x1="0" y1="${Y}" x2="${W}" y2="${Y}"/>`;
+    s+=`<text class="axl" x="5" y="${Y-4}">${lat}°N</text>`}
+
+  const hx=px(HOME[1]),hy=py(HOME[0]);
+  [[2.5,187],[5,375],[9,675]].forEach(([h,km])=>{const rad=km/111*MSC;
+    s+=`<circle class="ring" cx="${hx}" cy="${hy}" r="${rad.toFixed(1)}"/>`;
+    s+=`<text class="ringlab" x="${hx-4}" y="${(hy-rad+13).toFixed(1)}" text-anchor="end">${
+      String(h).replace(".",L==="sk"?",":".")} h</text>`});
+
+  LANDLAB.forEach(([lat,lon,k])=>{const X=px(lon),Y=py(lat);
+    if(X<10||X>W-10||Y<10||Y>H-10)return;
+    s+=`<text class="cname-lab" x="${X}" y="${Y}" text-anchor="middle">${c.cname[k]||k}</text>`});
+
+  r.forEach(d=>{const co=CO[d[0]];if(!co)return;
+    const id=slug(d[0]),on=SEL===id;
+    s+=`<circle class="dot" cx="${px(co[1]).toFixed(1)}" cy="${py(co[0]).toFixed(1)}"
+      r="${on?9:d[9]?7.5:5.5}" fill="${wColor(d[3])}" fill-opacity="${on||d[9]?1:.75}"
+      stroke="${on?"var(--accent)":"var(--panel)"}" stroke-width="${on?3:1.2}"
+      tabindex="0" role="button" aria-label="${d[0]}" data-t="${id}"
+      data-n="${d[0]}" data-h="${d[4]}" data-v="${d[5]}–${d[6]}"></circle>`});
+
+  s+=`<circle class="home" cx="${hx}" cy="${hy}" r="4.5"/>`
+   +`<text class="homelab" x="${hx+9}" y="${hy+4}">Bratislava</text>`;
+  $("map").innerHTML=s;
+  wire($("map"));
+}
+
+function wire(svg){
+  const tip=$("tip"),box=document.querySelector(".chartbox");
+  tip.hidden=true;
+  const show=el=>{const b=box.getBoundingClientRect(),e=el.getBoundingClientRect();
+    tip.innerHTML=`<b>${el.dataset.n}</b><i>${el.dataset.h} h · ${el.dataset.v} m</i>`;
+    tip.hidden=false;
+    tip.style.left=(e.left+e.width/2-b.left)+"px";
+    tip.style.top=(e.top-b.top)+"px"};
+  const hide=()=>{tip.hidden=true};
+  svg.querySelectorAll(".dot").forEach(el=>{
+    const go=()=>{SEL=el.dataset.t;draw();
+      const cd=$("c-"+SEL);if(!cd)return;
+      cd.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches
+        ?"auto":"smooth",block:"center"})};
+    el.addEventListener("mouseenter",()=>show(el));
+    el.addEventListener("focus",()=>show(el));
+    el.addEventListener("mouseleave",hide);
+    el.addEventListener("blur",hide);
+    el.addEventListener("click",go);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}})});
+}
+
+const GMID="12yUS0svArYSvkcMHvIJfwbXHlj0QaVQ";
+let MODE="chart";
+$("segChart").addEventListener("click",()=>setMode("chart"));
+$("segMap").addEventListener("click",()=>setMode("map"));
+
+
+function setMode(m){MODE=m;
+  $("segChart").classList.toggle("on",m==="chart");
+  $("segMap").classList.toggle("on",m==="map");
+  const vis=(el,show)=>show?el.removeAttribute("hidden"):el.setAttribute("hidden","");
+  vis($("chart"),m==="chart"); vis($("map"),m==="map");
+  const c=t();
+  $("chartTitle").textContent=m==="map"?c.mapTitle:c.chartTitle;
+  $("chartHint").textContent=m==="map"?c.mapHint:c.chartHint;
+  $("legNote").textContent=m==="map"?c.legend[4]:c.legend[3];
+  draw()}
+
+const draw=()=>{ranges();cards();MODE==="map"?map():chart()};
+["fC","fW","fD","fS","fF","q","lkm","eur","maxH","minV","maxC"].forEach(i=>{
+  $(i).addEventListener("input",draw);$(i).addEventListener("change",draw)});
+$("vig").addEventListener("change",draw);
+$("reset").addEventListener("click",()=>{
+  $("fC").value="all";$("fW").value="all";$("fD").value="all";
+  $("fF").checked=false;$("q").value="";
+  $("maxH").value=9;$("minV").value=0;$("maxC").value=300;SEL=null;draw()});
+
+const root=document.documentElement;
+const isDark=()=>root.getAttribute("data-theme")==="dark"
+  ||(!root.hasAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);
+function themeLabel(){$("theme").textContent=isDark()?t().light:t().dark}
+$("theme").addEventListener("click",()=>{
+  root.setAttribute("data-theme",isDark()?"light":"dark");themeLabel();chart()});
+$("lang").addEventListener("click",()=>{L=L==="sk"?"en":"sk";chrome();draw()});
+
+chrome();draw();
+</script>

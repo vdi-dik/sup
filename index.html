@@ -48,7 +48,7 @@ h1,h2,h3,.disp{font-family:"Avenir Next Condensed","Helvetica Neue Condensed",
 
 header{border-bottom:1px solid var(--line);background:var(--panel)}
 .hbar{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
-  justify-content:space-between;padding:26px 0 20px}
+  justify-content:space-between;padding:26px 20px 20px}
 h1{font-size:clamp(26px,4.4vw,40px);line-height:1.02}
 h1 em{font-style:normal;color:var(--accent)}
 .sub{color:var(--ink-2);font-size:14.5px;margin-top:7px;max-width:60ch}
@@ -134,7 +134,14 @@ input[type=range]{width:100%;accent-color:var(--accent);background:transparent;
 .cchip:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
 .cchip input{accent-color:var(--accent);margin:0}
 .cchip .n{font-family:ui-monospace,Menlo,monospace;font-size:11px;opacity:.7}
-.count{color:var(--ink-3);font-size:13.5px;margin:14px 0 16px}
+.resbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;
+  justify-content:space-between;margin:20px 0 16px;padding-top:14px;
+  border-top:1px solid var(--line)}
+.count{color:var(--ink-3);font-size:13.5px;margin:0}
+.sortinline{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.sortinline > span{font-family:"Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.sortinline select{width:auto;padding:6px 8px;font-size:14px}
 .count b{color:var(--ink);font-weight:400}
 
 .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
@@ -211,7 +218,7 @@ footer b{color:var(--ink-2);font-weight:400}
 @media (max-width:700px){
   body{font-size:15.5px}
   .wrap{padding:0 14px}
-  .hbar{padding:18px 0 14px;gap:14px}
+  .hbar{padding:18px 14px 14px;gap:14px}
   .chead{gap:10px}
   .chead .eyebrow{display:none}
   .chartbox{padding:14px 12px 6px;margin:18px 0}
@@ -220,6 +227,9 @@ footer b{color:var(--ink-2);font-weight:400}
   .chartscroll{margin:0 -12px;padding:0 12px}
   .controls{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
   .chk{padding-top:6px}
+  .resbar{gap:8px}
+  .sortinline{flex:1 1 100%}
+  .sortinline select{flex:1}
   .grid-cards{grid-template-columns:1fr;gap:12px}
   .card{padding:14px 14px 12px}
   .row{grid-template-columns:64px 1fr;gap:8px}
@@ -276,7 +286,6 @@ footer b{color:var(--ink-2);font-weight:400}
     <label class="f"><span id="lC"></span><select id="fC"></select></label>
     <label class="f"><span id="lW"></span><select id="fW"></select></label>
     <label class="f"><span id="lD"></span><select id="fD"></select></label>
-    <label class="f"><span id="lS"></span><select id="fS"></select></label>
     <label class="f"><span id="lQ"></span><input type="text" id="q"></label>
   </section>
 
@@ -306,7 +315,10 @@ footer b{color:var(--ink-2);font-weight:400}
     <div class="ctys" id="vig"></div>
   </section>
 
-  <p class="count" id="count"></p>
+  <div class="resbar">
+    <p class="count" id="count"></p>
+    <label class="sortinline"><span id="lS"></span><select id="fS"></select></label>
+  </div>
   <div class="grid-cards" id="cards"></div>
 
   <section class="panelbox">

@@ -1,7 +1,8 @@
-# SUP & Freedive — do 9 h z Bratislavy
+# SUP destinácie z Bratislavy
 
-Plánovač výletov na paddleboard a freedive. Jedna HTML stránka, žiadne závislosti,
-**funguje aj offline** — všetko vrátane mapových podkladov je v súbore.
+Kam ísť autom na paddleboard a šnorchlovanie — jazerá, more, ostrovy a zátoky do 8,5 hodiny
+jazdy z Bratislavy. Nie je to stránka o výbave, ale o tom, kam ísť. Jedna HTML stránka,
+žiadne závislosti, **funguje aj offline** — všetko vrátane mapových podkladov je v súbore.
 
 👉 **[Otvoriť stránku](https://vdi-dik.github.io/sup/)**
 
